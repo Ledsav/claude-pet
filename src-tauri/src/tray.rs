@@ -1,3 +1,7 @@
+use crate::{
+    perform,
+    stats::Pet,
+};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -16,21 +20,45 @@ pub fn toggle_window(app: &AppHandle) {
     }
 }
 
+/// Keeps the tray tooltip showing current stats.
+pub fn show_stats(app: &AppHandle, pet: &Pet) {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        let tip = format!(
+            "Mochi{} · food {:.0} · mood {:.0} · energy {:.0}",
+            if pet.asleep { " (asleep)" } else { "" },
+            pet.hunger,
+            pet.mood,
+            pet.energy
+        );
+        let _ = tray.set_tooltip(Some(tip));
+    }
+}
+
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
-    let toggle = MenuItem::with_id(app, "toggle", "Show / hide pet", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let item = |id: &str, label: &str| MenuItem::with_id(app, id, label, true, None::<&str>);
     let menu = Menu::with_items(
         app,
-        &[&toggle, &PredefinedMenuItem::separator(app)?, &quit],
+        &[
+            &item("toggle", "Show / hide pet")?,
+            &PredefinedMenuItem::separator(app)?,
+            &item("feed", "Feed")?,
+            &item("play", "Play")?,
+            &item("sleep", "Sleep / wake")?,
+            &PredefinedMenuItem::separator(app)?,
+            &item("quit", "Quit")?,
+        ],
     )?;
 
     TrayIconBuilder::with_id(TRAY_ID)
         .icon(app.default_window_icon().cloned().expect("bundle icon"))
-        .tooltip("Claude Pet")
+        .tooltip("Mochi")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "toggle" => toggle_window(app),
+            "feed" => drop(perform(app, Pet::feed)),
+            "play" => drop(perform(app, Pet::play)),
+            "sleep" => drop(perform(app, Pet::toggle_sleep)),
             "quit" => app.exit(0),
             _ => {}
         })
