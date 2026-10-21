@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="840" viewBox="0 0 1600 840"><defs><filter id="grey"><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="1600" height="840" fill="#f7f7f4"/><text x="60" y="78" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="40" font-weight="700" fill="#161616">Mochi character concepts</text><text x="60" y="116" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="20" fill="#6b6b6b">Concepts for review — pick a direction (or tell me what you like in each).</text><rect x="60" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#161616" stroke-width="2"/><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="90" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 50v32" stroke="#000" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M128 58c-6-18-24-26-42-22 4 18 22 28 42 22z"/>
+  <path d="M130 52c8-22 30-30 50-24-4 22-28 32-50 24z"/>
+  <path d="M36 190c0-64 40-106 92-106s92 42 92 106c0 18-12 28-30 28H66c-18 0-30-10-30-28z"/>
+  <ellipse cx="98" cy="158" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="158" cy="158" rx="11" ry="14" fill="#fff"/>
+  <path d="M116 180q12 12 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="90" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 50v32" stroke="#000" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M128 58c-6-18-24-26-42-22 4 18 22 28 42 22z"/>
+  <path d="M130 52c8-22 30-30 50-24-4 22-28 32-50 24z"/>
+  <path d="M36 190c0-64 40-106 92-106s92 42 92 106c0 18-12 28-30 28H66c-18 0-30-10-30-28z"/>
+  <ellipse cx="98" cy="158" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="158" cy="158" rx="11" ry="14" fill="#fff"/>
+  <path d="M116 180q12 12 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="122" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="180" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 50v32" stroke="#000" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M128 58c-6-18-24-26-42-22 4 18 22 28 42 22z"/>
+  <path d="M130 52c8-22 30-30 50-24-4 22-28 32-50 24z"/>
+  <path d="M36 190c0-64 40-106 92-106s92 42 92 106c0 18-12 28-30 28H66c-18 0-30-10-30-28z"/>
+  <ellipse cx="98" cy="158" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="158" cy="158" rx="11" ry="14" fill="#fff"/>
+  <path d="M116 180q12 12 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="196" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="238" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 50v32" stroke="#000" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M128 58c-6-18-24-26-42-22 4 18 22 28 42 22z"/>
+  <path d="M130 52c8-22 30-30 50-24-4 22-28 32-50 24z"/>
+  <path d="M36 190c0-64 40-106 92-106s92 42 92 106c0 18-12 28-30 28H66c-18 0-30-10-30-28z"/>
+  <ellipse cx="98" cy="158" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="158" cy="158" rx="11" ry="14" fill="#fff"/>
+  <path d="M116 180q12 12 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="246" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="90.0" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">A · Sprout</text><text x="90.0" y="664" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#161616" letter-spacing="1.5">RECOMMENDED</text><text x="90.0" y="698" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">A squishy mochi bun whose leaf sprout is</text><text x="90.0" y="724" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">its mood antenna: perky, droopy, curled</text><text x="90.0" y="750" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">asleep.</text><rect x="562.667" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="592.667" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <path d="M74 98 80 42l38 26zM182 98l-6-56-38 26z" stroke="#000" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M190 192c30 2 42-34 20-52" stroke="#000" stroke-width="14" stroke-linecap="round" fill="none"/>
+  <path d="M64 116c0-36 28-56 64-56s64 20 64 56v64c0 28-26 44-64 44s-64-16-64-44z"/>
+  <ellipse cx="104" cy="134" rx="10" ry="13" fill="#fff"/>
+  <ellipse cx="152" cy="134" rx="10" ry="13" fill="#fff"/>
+  <path d="M114 158q7 9 14 0q7 9 14 0" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+</g><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="592.667" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <path d="M74 98 80 42l38 26zM182 98l-6-56-38 26z" stroke="#000" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M190 192c30 2 42-34 20-52" stroke="#000" stroke-width="14" stroke-linecap="round" fill="none"/>
+  <path d="M64 116c0-36 28-56 64-56s64 20 64 56v64c0 28-26 44-64 44s-64-16-64-44z"/>
+  <ellipse cx="104" cy="134" rx="10" ry="13" fill="#fff"/>
+  <ellipse cx="152" cy="134" rx="10" ry="13" fill="#fff"/>
+  <path d="M114 158q7 9 14 0q7 9 14 0" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+</g><text x="624.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="682.667" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <path d="M74 98 80 42l38 26zM182 98l-6-56-38 26z" stroke="#000" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M190 192c30 2 42-34 20-52" stroke="#000" stroke-width="14" stroke-linecap="round" fill="none"/>
+  <path d="M64 116c0-36 28-56 64-56s64 20 64 56v64c0 28-26 44-64 44s-64-16-64-44z"/>
+  <ellipse cx="104" cy="134" rx="10" ry="13" fill="#fff"/>
+  <ellipse cx="152" cy="134" rx="10" ry="13" fill="#fff"/>
+  <path d="M114 158q7 9 14 0q7 9 14 0" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+</g><text x="698.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="740.667" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <path d="M74 98 80 42l38 26zM182 98l-6-56-38 26z" stroke="#000" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M190 192c30 2 42-34 20-52" stroke="#000" stroke-width="14" stroke-linecap="round" fill="none"/>
+  <path d="M64 116c0-36 28-56 64-56s64 20 64 56v64c0 28-26 44-64 44s-64-16-64-44z"/>
+  <ellipse cx="104" cy="134" rx="10" ry="13" fill="#fff"/>
+  <ellipse cx="152" cy="134" rx="10" ry="13" fill="#fff"/>
+  <path d="M114 158q7 9 14 0q7 9 14 0" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+</g><text x="748.667" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="592.6666666666667" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">B · Bean Cat</text><text x="592.6666666666667" y="670" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">A jellybean kitten: ear nubs and a curl</text><text x="592.6666666666667" y="696" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">tail that swishes; the most classic pet.</text><rect x="1065.33" y="150" width="474.667" height="630" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1095.33" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 228c-48 0-76-30-76-72 0-38 24-62 48-86 14-14 22-30 18-48 34 10 58 38 64 68 14 16 22 40 22 66 0 42-28 72-76 72z"/>
+  <ellipse cx="106" cy="160" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="152" cy="160" rx="11" ry="14" fill="#fff"/>
+  <path d="M117 184q12 11 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1095.33" y="516" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 228c-48 0-76-30-76-72 0-38 24-62 48-86 14-14 22-30 18-48 34 10 58 38 64 68 14 16 22 40 22 66 0 42-28 72-76 72z"/>
+  <ellipse cx="106" cy="160" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="152" cy="160" rx="11" ry="14" fill="#fff"/>
+  <path d="M117 184q12 11 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="1127.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1185.33" y="548" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 228c-48 0-76-30-76-72 0-38 24-62 48-86 14-14 22-30 18-48 34 10 58 38 64 68 14 16 22 40 22 66 0 42-28 72-76 72z"/>
+  <ellipse cx="106" cy="160" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="152" cy="160" rx="11" ry="14" fill="#fff"/>
+  <path d="M117 184q12 11 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="1201.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g filter="url(#grey)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" x="1243.33" y="564" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <path d="M128 228c-48 0-76-30-76-72 0-38 24-62 48-86 14-14 22-30 18-48 34 10 58 38 64 68 14 16 22 40 22 66 0 42-28 72-76 72z"/>
+  <ellipse cx="106" cy="160" rx="11" ry="14" fill="#fff"/>
+  <ellipse cx="152" cy="160" rx="11" ry="14" fill="#fff"/>
+  <path d="M117 184q12 11 24 0" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>
+</g><text x="1251.33" y="600" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="1095.3333333333335" y="636" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">C · Ember</text><text x="1095.3333333333335" y="670" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">A little warm flame spirit whose tip</text><text x="1095.3333333333335" y="696" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">flickers bright when happy and dims when</text><text x="1095.3333333333335" y="722" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">tired.</text></svg>

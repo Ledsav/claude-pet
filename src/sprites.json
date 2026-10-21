@@ -1,0 +1,74 @@
+{
+  "frame": 128,
+  "cols": 8,
+  "rows": 10,
+  "skins": {
+    "blob": "Blob",
+    "sprout": "Sprout",
+    "beancat": "Bean Cat",
+    "ember": "Ember",
+    "spark": "Spark"
+  },
+  "anims": {
+    "idle": {
+      "row": 0,
+      "frames": 8,
+      "fps": 6,
+      "loop": true
+    },
+    "happy": {
+      "row": 1,
+      "frames": 8,
+      "fps": 9,
+      "loop": true
+    },
+    "sad": {
+      "row": 2,
+      "frames": 6,
+      "fps": 4,
+      "loop": true
+    },
+    "hungry": {
+      "row": 3,
+      "frames": 8,
+      "fps": 8,
+      "loop": true
+    },
+    "tired": {
+      "row": 4,
+      "frames": 6,
+      "fps": 4,
+      "loop": true
+    },
+    "sleep": {
+      "row": 5,
+      "frames": 8,
+      "fps": 4,
+      "loop": true
+    },
+    "eat": {
+      "row": 6,
+      "frames": 8,
+      "fps": 8,
+      "loop": false
+    },
+    "play": {
+      "row": 7,
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    },
+    "talk": {
+      "row": 8,
+      "frames": 4,
+      "fps": 8,
+      "loop": true
+    },
+    "wiggle": {
+      "row": 9,
+      "frames": 6,
+      "fps": 10,
+      "loop": false
+    }
+  }
+}

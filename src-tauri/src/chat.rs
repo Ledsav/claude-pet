@@ -83,6 +83,38 @@ pub fn brain_dir(data_dir: &Path) -> std::io::Result<PathBuf> {
     Ok(dir)
 }
 
+/// Overwrites the personality with the built-in default.
+pub fn reset_personality(brain: &Path) -> std::io::Result<()> {
+    fs::write(brain.join("CLAUDE.md"), DEFAULT_PERSONALITY)
+}
+
+/// Prompt for an unprompted pep talk.
+pub fn build_nudge_prompt(name: &str, status: &str, history: &History) -> String {
+    build_prompt(
+        name,
+        status,
+        history,
+        "(nobody said anything: the human is busy working at their computer. Give them a short, \
+         specific nudge of motivation to keep going, or if it's been a while, a gentle reminder to \
+         stretch or drink water. Don't start with a greeting.)",
+    )
+}
+
+/// Used when Claude is unavailable or rate-limited, so pep talks never go silent.
+pub fn fallback_pep(seed: u64) -> &'static str {
+    const LINES: [&str; 8] = [
+        "you've got this! one small step at a time",
+        "tiny progress is still progress. keep going!",
+        "deep breath, sip of water, back at it. i believe in you",
+        "focus mode: on. i'll guard the desktop *boing*",
+        "stretch break? then let's crush the next task",
+        "proud of you for showing up today",
+        "pick the smallest next step and do just that one",
+        "future you is gonna be so happy you did this",
+    ];
+    LINES[(seed % LINES.len() as u64) as usize]
+}
+
 pub fn clean_message(raw: &str) -> Result<String, String> {
     let msg = raw.trim();
     if msg.is_empty() {

@@ -3,7 +3,9 @@ import {
   chat,
   getPet,
   getSettings,
+  onNudge,
   onReaction,
+  onSettings,
   onStats,
   runCommand,
   type Pet,
@@ -13,15 +15,34 @@ import { Panel } from "./panel";
 import { PetView, type Mood } from "./pet";
 
 const bubbleEl = document.getElementById("bubble")!;
+const bubbleText = bubbleEl.querySelector<HTMLElement>(".bubble-text")!;
 let bubbleTimer: number | undefined;
 
-/** Shows a speech bubble; it stays up longer for longer text. `ms = 0` keeps it up. */
-function say(text: string, ms = Math.min(12000, 2500 + text.length * 60)) {
+/**
+ * Shows a speech bubble for long enough to read it (about 15 characters a second).
+ * It stays up while hovered, so long replies can be scrolled. `ms = 0` keeps it up.
+ */
+function say(text: string, ms = Math.min(30000, 3000 + text.length * 65)) {
   bubbleEl.classList.remove("thinking");
-  bubbleEl.textContent = text;
+  bubbleText.textContent = text;
+  bubbleText.scrollTop = 0;
   bubbleEl.classList.add("show");
   clearTimeout(bubbleTimer);
-  if (ms > 0) bubbleTimer = window.setTimeout(() => bubbleEl.classList.remove("show"), ms);
+  if (ms > 0) bubbleTimer = window.setTimeout(hideBubble, ms);
+}
+
+function hideBubble() {
+  if (bubbleEl.matches(":hover")) {
+    bubbleTimer = window.setTimeout(hideBubble, 1500);
+    return;
+  }
+  bubbleEl.classList.remove("show");
+}
+
+/** The pet "speaks" a line Claude wrote. */
+function speak(text: string) {
+  pet.play("talk", Math.min(3000, 400 + text.length * 25));
+  say(text);
 }
 
 function moodOf(p: Pet): Mood {
@@ -33,7 +54,7 @@ function moodOf(p: Pet): Mood {
   return "neutral";
 }
 
-const pet = new PetView(document.getElementById("pet")!, () => pet.play("wiggle", 900));
+const pet = new PetView(document.getElementById("pet")!, () => pet.play("wiggle"));
 const panel = new Panel(
   document.getElementById("panel")!,
   (action) => void act(action),
@@ -43,15 +64,13 @@ const panel = new Panel(
 async function talk(msg: string) {
   if (msg.startsWith("/")) return command(msg);
   panel.setThinking(true);
-  bubbleEl.textContent = "";
+  bubbleText.textContent = "";
   bubbleEl.classList.add("show", "thinking");
   clearTimeout(bubbleTimer);
   try {
-    const reply = await chat(msg);
-    pet.play("talk", Math.min(3000, 400 + reply.length * 25));
-    say(reply);
+    speak(await chat(msg));
   } catch (err) {
-    pet.play("wiggle", 600);
+    pet.play("wiggle");
     say(String(err));
   } finally {
     panel.setThinking(false);
@@ -60,8 +79,11 @@ async function talk(msg: string) {
 
 /** Slash commands are handled by the app itself, never sent to Claude. */
 async function command(input: string) {
+  const pep = /^\/(motivate|pep)\b/i.test(input);
   try {
-    say(await runCommand(input), 8000);
+    const out = await runCommand(input);
+    if (pep) speak(out);
+    else say(out, 10000);
   } catch (err) {
     say(String(err), 6000);
   }
@@ -76,14 +98,17 @@ const ANIM: Partial<Record<Reaction["action"], "eat" | "play">> = { feed: "eat",
 
 function react(r: Reaction) {
   const anim = r.ok ? ANIM[r.action] : undefined;
-  if (anim) pet.play(anim, 1300);
-  else if (!r.ok) pet.play("wiggle", 600);
+  if (anim) pet.play(anim);
+  else if (!r.ok) pet.play("wiggle");
   say(r.message);
 }
 
 void onStats(render);
 void onReaction(react);
+void onSettings((s) => pet.setSkin(s.skin));
+void onNudge(speak);
 void Promise.all([getPet(), getSettings()]).then(([p, s]) => {
+  pet.setSkin(s.skin);
   render(p);
   say(p.asleep ? "zzz…" : `hi! i'm ${s.name.toLowerCase()}. type /help for commands`);
 });

@@ -89,11 +89,9 @@ fn sleep(app: AppHandle) -> Outcome {
     perform(&app, Pet::toggle_sleep)
 }
 
-/// Sends a message to the pet. One call at a time, and rate-limited so a chatty
-/// afternoon doesn't eat the Claude subscription.
-#[tauri::command]
-async fn chat(app: AppHandle, state: State<'_, AppState>, message: String) -> Result<String, String> {
-    let message = chat::clean_message(&message)?;
+/// Asks Claude for a reply to `message`, or for an unprompted pep talk when it's None.
+/// One call at a time, and rate-limited so a chatty afternoon doesn't eat the subscription.
+async fn ask_pet(app: &AppHandle, state: &AppState, message: Option<String>) -> Result<String, String> {
     if state.thinking.swap(true, Ordering::SeqCst) {
         return Err("hold on, i'm still thinking…".into());
     }
@@ -106,13 +104,46 @@ async fn chat(app: AppHandle, state: State<'_, AppState>, message: String) -> Re
         let s = state.settings.lock().unwrap();
         (s.name.clone(), s.model.clone())
     };
-    let status = with_pet(&app, |pet| pet.describe());
-    let prompt = chat::build_prompt(&name, &status, &state.history.lock().unwrap(), &message);
+    let status = with_pet(app, |pet| pet.describe());
+    let prompt = {
+        let history = state.history.lock().unwrap();
+        match &message {
+            Some(m) => chat::build_prompt(&name, &status, &history, m),
+            None => chat::build_nudge_prompt(&name, &status, &history),
+        }
+    };
     let reply = chat::ask_claude(&state.brain, &model, &prompt).await?;
 
-    state.history.lock().unwrap().push(message, reply.clone());
+    let said = message.unwrap_or_else(|| "(you cheered them on unprompted)".into());
+    state.history.lock().unwrap().push(said, reply.clone());
+    Ok(reply)
+}
+
+#[tauri::command]
+async fn chat(app: AppHandle, state: State<'_, AppState>, message: String) -> Result<String, String> {
+    let message = chat::clean_message(&message)?;
+    let reply = ask_pet(&app, &state, Some(message)).await?;
     with_pet(&app, Pet::chatted);
     Ok(reply)
+}
+
+/// Every `motivate` minutes, an awake pet pipes up with encouragement.
+async fn pep_talk_loop(app: AppHandle) {
+    let mut last = Instant::now();
+    loop {
+        tokio::time::sleep(Duration::from_secs(30)).await;
+        let state = app.state::<AppState>();
+        let minutes = state.settings.lock().unwrap().motivate;
+        let asleep = state.pet.lock().unwrap().asleep;
+        if minutes == 0 || asleep || last.elapsed() < Duration::from_secs(minutes as u64 * 60) {
+            continue;
+        }
+        last = Instant::now();
+        let text = ask_pet(&app, &state, None)
+            .await
+            .unwrap_or_else(|_| chat::fallback_pep(now_ms()).to_string());
+        let _ = app.emit("nudge", text);
+    }
 }
 
 #[tauri::command]
@@ -122,7 +153,7 @@ fn get_settings(state: State<'_, AppState>) -> Settings {
 
 /// Handles chat-box input starting with `/`. These never reach Claude.
 #[tauri::command]
-fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> Result<String, String> {
+async fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> Result<String, String> {
     match settings::parse(&input)? {
         Command::Help => Ok(settings::HELP.into()),
         Command::ShowSettings => Ok(state.settings.lock().unwrap().describe()),
@@ -138,9 +169,20 @@ fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> Result<
             apply_settings(&app, &updated.1);
             Ok(updated.0)
         }
-        Command::Personality => {
+        Command::Personality { reset: false } => {
             tray::open_personality(&app);
             Ok("opening my personality file… save it and i'll change on the next chat".into())
+        }
+        Command::Personality { reset: true } => {
+            chat::reset_personality(&state.brain).map_err(|e| format!("couldn't reset: {e}"))?;
+            Ok("personality restored to the default. hi again!".into())
+        }
+        Command::Motivate => {
+            let text = match ask_pet(&app, &state, None).await {
+                Ok(text) => text,
+                Err(_) => chat::fallback_pep(now_ms()).to_string(),
+            };
+            Ok(text)
         }
         Command::Stats => Ok(with_pet(&app, |pet| pet.describe())),
         Command::Clear => {
@@ -217,6 +259,7 @@ pub fn run() {
             window.show()?;
             tray::build(app.handle())?;
 
+            tauri::async_runtime::spawn(pep_talk_loop(app.handle().clone()));
             let handle = app.handle().clone();
             thread::spawn(move || loop {
                 with_pet(&handle, |_| ());

@@ -16,7 +16,14 @@ pub struct Settings {
     pub on_top: bool,
     /// Max chat messages per hour.
     pub hourly_limit: usize,
+    /// Sprite sheet to draw, one of `SKINS`.
+    pub skin: String,
+    /// Minutes between unprompted pep talks; 0 turns them off.
+    pub motivate: u32,
 }
+
+/// Must match the sheets in public/sprites (see scripts/sprites/skins.mjs).
+pub const SKINS: [&str; 5] = ["blob", "sprout", "beancat", "ember", "spark"];
 
 impl Default for Settings {
     fn default() -> Self {
@@ -26,11 +33,13 @@ impl Default for Settings {
             speed: 1.0,
             on_top: true,
             hourly_limit: 30,
+            skin: "blob".into(),
+            motivate: 45,
         }
     }
 }
 
-pub const KEYS: &str = "name, model, speed, ontop, limit";
+pub const KEYS: &str = "name, skin, model, speed, ontop, limit, motivate";
 
 impl Settings {
     pub fn load(dir: &Path) -> Self {
@@ -47,12 +56,14 @@ impl Settings {
 
     pub fn describe(&self) -> String {
         format!(
-            "name: {} · model: {} · speed: {}x · ontop: {} · limit: {}/hour",
+            "name: {} · skin: {} · model: {} · speed: {}x · ontop: {} · limit: {}/hour · motivate: {}",
             self.name,
+            self.skin,
             self.model,
             self.speed,
             if self.on_top { "on" } else { "off" },
-            self.hourly_limit
+            self.hourly_limit,
+            if self.motivate == 0 { "off".to_string() } else { format!("every {} min", self.motivate) }
         )
     }
 
@@ -100,6 +111,24 @@ impl Settings {
                 self.hourly_limit = limit;
                 Ok(format!("up to {limit} chats per hour"))
             }
+            "skin" => {
+                if !SKINS.contains(&value) {
+                    return Err(format!("skins: {}", SKINS.join(", ")));
+                }
+                self.skin = value.into();
+                Ok(format!("*poof* new look: {value}!"))
+            }
+            "motivate" => {
+                let minutes: u32 = match value {
+                    "off" => 0,
+                    v => v.parse().map_err(|_| "motivate is minutes between pep talks, or off")?,
+                };
+                if minutes > 240 {
+                    return Err("motivate must be 0–240 minutes".into());
+                }
+                self.motivate = minutes;
+                Ok(if minutes == 0 { "ok, no unprompted pep talks".into() } else { format!("i'll cheer you on every {minutes} minutes") })
+            }
             _ => Err(format!("unknown setting '{key}'. try: {KEYS}")),
         }
     }
@@ -115,13 +144,14 @@ pub enum Command {
     Help,
     ShowSettings,
     Set(String, String),
-    Personality,
+    Personality { reset: bool },
+    Motivate,
     Stats,
     Clear,
     Reset { confirmed: bool },
 }
 
-pub const HELP: &str = "/settings · /settings <key> <value> (keys: name, model, speed, ontop, limit) · /stats · /personality · /clear · /reset";
+pub const HELP: &str = "/settings · /settings <key> <value> · /motivate · /stats · /personality [reset] · /clear · /reset";
 
 pub fn parse(input: &str) -> Result<Command, String> {
     let input = input.trim().trim_start_matches('/');
@@ -134,7 +164,8 @@ pub fn parse(input: &str) -> Result<Command, String> {
             let (key, value) = rest.split_once(char::is_whitespace).ok_or("usage: /settings <key> <value>")?;
             Ok(Command::Set(key.to_lowercase(), value.trim().into()))
         }
-        "personality" => Ok(Command::Personality),
+        "personality" => Ok(Command::Personality { reset: rest == "reset" }),
+        "motivate" | "pep" => Ok(Command::Motivate),
         "stats" => Ok(Command::Stats),
         "clear" => Ok(Command::Clear),
         "reset" => Ok(Command::Reset { confirmed: rest == "confirm" }),
@@ -152,6 +183,8 @@ mod tests {
         assert_eq!(parse("/settings"), Ok(Command::ShowSettings));
         assert_eq!(parse("/settings  Name   Sir Blob "), Ok(Command::Set("name".into(), "Sir Blob".into())));
         assert_eq!(parse("/reset"), Ok(Command::Reset { confirmed: false }));
+        assert_eq!(parse("/personality reset"), Ok(Command::Personality { reset: true }));
+        assert_eq!(parse("/motivate"), Ok(Command::Motivate));
         assert_eq!(parse("/reset confirm"), Ok(Command::Reset { confirmed: true }));
         assert!(parse("/settings name").is_err());
         assert!(parse("/dance").is_err());
@@ -172,6 +205,11 @@ mod tests {
         assert!(s.set("ontop", "off").is_ok());
         assert!(!s.on_top);
         assert!(s.set("limit", "0").is_err());
+        assert!(s.set("skin", "spark").is_ok());
+        assert!(s.set("skin", "dragon").is_err());
+        assert!(s.set("motivate", "off").is_ok());
+        assert_eq!(s.motivate, 0);
+        assert!(s.set("motivate", "999").is_err());
         assert!(s.set("colour", "red").is_err());
     }
 

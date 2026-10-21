@@ -24,6 +24,8 @@ export type Settings = {
   speed: number;
   on_top: boolean;
   hourly_limit: number;
+  skin: string;
+  motivate: number;
 };
 
 export const getPet = () => invoke<Pet>("get_pet");
@@ -37,3 +39,4 @@ export const onReaction = (cb: (r: Reaction) => void) =>
   listen<Reaction>("reaction", (e) => cb(e.payload));
 export const onSettings = (cb: (s: Settings) => void) =>
   listen<Settings>("settings", (e) => cb(e.payload));
+export const onNudge = (cb: (text: string) => void) => listen<string>("nudge", (e) => cb(e.payload));

@@ -1,4 +1,5 @@
 import type { Pet } from "./api";
+import { suggest, type Suggestion } from "./complete";
 
 type Stat = "hunger" | "mood" | "energy";
 const STATS: { key: Stat; label: string }[] = [
@@ -37,6 +38,7 @@ export class Panel {
         <button type="button" data-action="play">play</button>
         <button type="button" data-action="sleep">sleep</button>
       </div>
+      <ul class="suggest" role="listbox" aria-label="Command suggestions" hidden></ul>
       <form class="chat" autocomplete="off">
         <input name="msg" maxlength="500" placeholder="say something… or /help" aria-label="Message to your pet" />
         <button type="submit" aria-label="Send">↑</button>
@@ -58,13 +60,80 @@ export class Panel {
     const form = el.querySelector<HTMLFormElement>(".chat")!;
     this.input = form.querySelector("input")!;
     this.sendBtn = form.querySelector("button")!;
+    this.list = el.querySelector(".suggest")!;
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const msg = this.input.value.trim();
-      if (!msg || this.sendBtn.disabled) return;
+      // Slash commands are local, so they still work while the pet is thinking.
+      if (!msg || (this.sendBtn.disabled && !msg.startsWith("/"))) return;
       this.input.value = "";
+      this.refreshSuggestions();
       onChat(msg);
     });
+    this.input.addEventListener("input", () => this.refreshSuggestions());
+    this.input.addEventListener("keydown", (e) => this.onKey(e));
+    this.input.addEventListener("blur", () => setTimeout(() => this.showSuggestions([]), 120));
+    this.list.addEventListener("pointerdown", (e) => {
+      const li = (e.target as HTMLElement).closest<HTMLElement>("[data-i]");
+      if (!li) return;
+      e.preventDefault(); // keep focus in the input
+      this.accept(Number(li.dataset.i));
+    });
+  }
+
+  private list: HTMLElement;
+  private suggestions: Suggestion[] = [];
+  private selected = 0;
+
+  private refreshSuggestions() {
+    const all = suggest(this.input.value);
+    // Hide once the input already equals the only (finished) completion.
+    const done = all.length === 1 && all[0].final && all[0].value === this.input.value.trim();
+    this.showSuggestions(done ? [] : all.slice(0, 6));
+  }
+
+  private showSuggestions(list: Suggestion[]) {
+    this.suggestions = list;
+    this.selected = 0;
+    this.list.hidden = list.length === 0;
+    this.list.innerHTML = list
+      .map(
+        (s, i) =>
+          `<li data-i="${i}" role="option" aria-selected="${i === 0}"><b>${escape(s.label)}</b><span>${escape(s.hint)}</span></li>`,
+      )
+      .join("");
+  }
+
+  private select(i: number) {
+    const n = this.suggestions.length;
+    this.selected = (i + n) % n;
+    this.list.querySelectorAll("li").forEach((li, j) => li.setAttribute("aria-selected", String(j === this.selected)));
+  }
+
+  private accept(i: number) {
+    const s = this.suggestions[i];
+    if (!s) return;
+    this.input.value = s.value;
+    this.input.focus();
+    this.refreshSuggestions();
+  }
+
+  /** ↑/↓ pick, Tab accepts, Enter accepts an unfinished completion (or sends), Esc closes. */
+  private onKey(e: KeyboardEvent) {
+    if (this.suggestions.length === 0) return;
+    const current = this.suggestions[this.selected];
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      this.select(this.selected + (e.key === "ArrowDown" ? 1 : -1));
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      this.accept(this.selected);
+    } else if (e.key === "Enter" && current.value.trim() !== this.input.value.trim()) {
+      e.preventDefault();
+      this.accept(this.selected);
+    } else if (e.key === "Escape") {
+      this.showSuggestions([]);
+    }
   }
 
   update(pet: Pet) {
@@ -81,4 +150,8 @@ export class Panel {
   setThinking(thinking: boolean) {
     this.sendBtn.disabled = thinking;
   }
+}
+
+function escape(s: string) {
+  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 }
