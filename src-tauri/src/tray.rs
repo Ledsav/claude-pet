@@ -1,7 +1,4 @@
-use crate::{
-    perform,
-    stats::Pet,
-};
+use crate::{perform, stats::Pet, AppState};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -34,6 +31,14 @@ pub fn show_stats(app: &AppHandle, pet: &Pet) {
     }
 }
 
+fn open_personality(app: &AppHandle) {
+    use tauri_plugin_opener::OpenerExt;
+    let file = app.state::<AppState>().brain.join("CLAUDE.md");
+    if let Err(e) = app.opener().open_path(file.to_string_lossy(), None::<&str>) {
+        eprintln!("couldn't open personality file: {e}");
+    }
+}
+
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
     let item = |id: &str, label: &str| MenuItem::with_id(app, id, label, true, None::<&str>);
     let menu = Menu::with_items(
@@ -45,6 +50,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             &item("play", "Play")?,
             &item("sleep", "Sleep / wake")?,
             &PredefinedMenuItem::separator(app)?,
+            &item("personality", "Edit personality…")?,
             &item("quit", "Quit")?,
         ],
     )?;
@@ -59,6 +65,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             "feed" => drop(perform(app, Pet::feed)),
             "play" => drop(perform(app, Pet::play)),
             "sleep" => drop(perform(app, Pet::toggle_sleep)),
+            "personality" => open_personality(app),
             "quit" => app.exit(0),
             _ => {}
         })

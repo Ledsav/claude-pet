@@ -1,4 +1,4 @@
-import { act, getPet, onReaction, onStats, type Pet, type Reaction } from "./api";
+import { act, chat, getPet, onReaction, onStats, type Pet, type Reaction } from "./api";
 import { Panel } from "./panel";
 import { PetView, type Mood } from "./pet";
 
@@ -27,8 +27,25 @@ const pet = new PetView(document.getElementById("pet")!, () => pet.play("wiggle"
 const panel = new Panel(
   document.getElementById("panel")!,
   (action) => void act(action),
-  () => {},
+  (msg) => void talk(msg),
 );
+
+async function talk(msg: string) {
+  panel.setThinking(true);
+  bubbleEl.textContent = "";
+  bubbleEl.classList.add("show", "thinking");
+  clearTimeout(bubbleTimer);
+  try {
+    const reply = await chat(msg);
+    pet.play("talk", Math.min(3000, 400 + reply.length * 25));
+    say(reply);
+  } catch (err) {
+    pet.play("wiggle", 600);
+    say(String(err));
+  } finally {
+    panel.setThinking(false);
+  }
+}
 
 function render(p: Pet) {
   pet.setMood(moodOf(p));

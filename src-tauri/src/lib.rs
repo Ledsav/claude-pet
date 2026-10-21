@@ -1,15 +1,39 @@
+mod chat;
 mod stats;
 mod tray;
 
+use chat::{History, RateLimiter};
 use stats::{now_ms, Outcome, Pet, Store};
-use std::{sync::Mutex, thread, time::Duration};
-use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, WebviewWindow};
+use std::{
+    path::PathBuf,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Mutex,
+    },
+    thread,
+    time::{Duration, Instant},
+};
+use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, State, WebviewWindow};
 
 const TICK: Duration = Duration::from_secs(5);
 
 pub struct AppState {
     pet: Mutex<Pet>,
     store: Store,
+    /// Folder whose CLAUDE.md is the pet's personality.
+    pub brain: PathBuf,
+    limiter: Mutex<RateLimiter>,
+    history: Mutex<History>,
+    thinking: AtomicBool,
+}
+
+/// Clears the "thinking" flag however the chat call ends.
+struct Thinking<'a>(&'a AtomicBool);
+
+impl Drop for Thinking<'_> {
+    fn drop(&mut self) {
+        self.0.store(false, Ordering::SeqCst);
+    }
 }
 
 /// Catches the pet up on decay, applies `f`, then saves and broadcasts the result.
@@ -57,6 +81,28 @@ fn sleep(app: AppHandle) -> Outcome {
     perform(&app, Pet::toggle_sleep)
 }
 
+/// Sends a message to the pet. One call at a time, and rate-limited so a chatty
+/// afternoon doesn't eat the Claude subscription.
+#[tauri::command]
+async fn chat(app: AppHandle, state: State<'_, AppState>, message: String) -> Result<String, String> {
+    let message = chat::clean_message(&message)?;
+    if state.thinking.swap(true, Ordering::SeqCst) {
+        return Err("hold on, i'm still thinking…".into());
+    }
+    let _thinking = Thinking(&state.thinking);
+    if let Err(wait) = state.limiter.lock().unwrap().try_acquire(Instant::now()) {
+        return Err(format!("my brain needs a break… try again in {}s", wait.as_secs().max(1)));
+    }
+
+    let status = with_pet(&app, |pet| pet.describe());
+    let prompt = chat::build_prompt(&status, &state.history.lock().unwrap(), &message);
+    let reply = chat::ask_claude(&state.brain, &prompt).await?;
+
+    state.history.lock().unwrap().push(message, reply.clone());
+    with_pet(&app, Pet::chatted);
+    Ok(reply)
+}
+
 /// Parks the pet in the bottom-right corner of the monitor it opens on.
 fn place_bottom_right(window: &WebviewWindow) -> tauri::Result<()> {
     if let Some(monitor) = window.current_monitor()? {
@@ -75,12 +121,23 @@ fn place_bottom_right(window: &WebviewWindow) -> tauri::Result<()> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_pet, feed, play, sleep])
+        .invoke_handler(tauri::generate_handler![get_pet, feed, play, sleep, chat])
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             let store = Store::new(&data_dir);
             let pet = store.load(now_ms());
-            app.manage(AppState { pet: Mutex::new(pet), store });
+            app.manage(AppState {
+                pet: Mutex::new(pet),
+                store,
+                brain: chat::brain_dir(&data_dir)?,
+                limiter: Mutex::new(RateLimiter::new(
+                    Duration::from_secs(4),
+                    30,
+                    Duration::from_secs(60 * 60),
+                )),
+                history: Mutex::new(History::default()),
+                thinking: AtomicBool::new(false),
+            });
 
             let window = app
                 .get_webview_window("main")
