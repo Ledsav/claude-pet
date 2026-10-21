@@ -27,7 +27,7 @@ export const SKINS = {
     // The sprout is the mood antenna: upright when perky, drooping when sad, sways in idle.
     draw: (p) => {
       const droop = (1 - p.a) * 32;
-      const sway = wave(p.t) * 6 + (p.a < 0 ? droop * 0.35 : 0);
+      const sway = wave(p.t) * 3 + (p.a < 0 ? droop * 0.35 : 0);
       return `
       <g transform="rotate(${sway.toFixed(1)} 64 47)">
         <path d="M64 47V29" stroke="#5E9A50" stroke-width="4.5" stroke-linecap="round"/>
@@ -46,7 +46,7 @@ export const SKINS = {
     // Ears flatten when sad; the tail swishes with the loop phase.
     draw: (p) => {
       const ear = (1 - p.a) * 9;
-      const tail = wave(p.t) * 14;
+      const tail = wave(p.t) * 9;
       return `
       <path d="M95 97c15 1 21-17 10-26" stroke="#D07F30" stroke-width="7" stroke-linecap="round" fill="none" transform="rotate(${tail.toFixed(1)} 95 97)"/>
       <g fill="#E0913E" stroke="#E0913E" stroke-width="6" stroke-linejoin="round">
@@ -67,7 +67,7 @@ export const SKINS = {
     face: { eyeY: 82, eyeDX: 11, mouthY: 94, cheek: "#FF9A7A" },
     // The tip flickers with the phase and leans more when perky; the inner glow dims when low.
     draw: (p) => {
-      const flick = wave(p.t, 2) * 4 + p.a * 2;
+      const flick = wave(p.t, 2) * 2.5 + p.a * 2;
       const glow = 0.35 + 0.5 * ((p.a + 1) / 2);
       return `
       <path d="M64 112c-24 0-38-15-38-36 0-19 12-31 24-43 7-7 ${11 + flick * 0.3}-15 ${9 + flick}-24 17 5 29 19 32 34 7 8 11 20 11 33 0 21-14 36-38 36z" fill="url(#ember-g)"/>
@@ -83,7 +83,7 @@ export const SKINS = {
     draw: (p) => {
       const cx = 64;
       const cy = 68;
-      const spin = p.t * 30 + wave(p.t) * 3;
+      const spin = wave(p.t) * 4; // a gentle wobble, never a continuous spin
       const reach = 1 + 0.12 * p.a;
       const rays = Array.from({ length: 11 }, (_, i) => {
         const ang = deg(i * (360 / 11) + spin + (i % 3) * 4 - 90);

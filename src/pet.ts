@@ -58,7 +58,7 @@ export class PetView {
    */
   play(anim: Anim, ms?: number) {
     const a = sprites.anims[anim];
-    const once = (a.frames / a.fps) * 1000;
+    const once = a.durations.reduce((sum, d) => sum + d, 0);
     this.oneShotUntil = performance.now() + (ms ?? (a.loop ? once * 2 : once));
     this.start(anim);
   }
@@ -66,10 +66,16 @@ export class PetView {
   private start(anim: Anim) {
     this.current = anim;
     this.frame = 0;
-    clearInterval(this.timer);
+    clearTimeout(this.timer);
     this.draw();
+  }
+
+  /** Shows the current frame and schedules the next one after that frame's duration. */
+  private schedule() {
+    clearTimeout(this.timer);
     if (reducedMotion.matches) return;
-    this.timer = window.setInterval(() => this.step(), 1000 / sprites.anims[anim].fps);
+    const ms = sprites.anims[this.current].durations[this.frame];
+    this.timer = window.setTimeout(() => this.step(), ms);
   }
 
   private step() {
@@ -87,6 +93,7 @@ export class PetView {
     const { frame } = sprites;
     const row = sprites.anims[this.current].row;
     this.sprite.style.backgroundPosition = `${-this.frame * frame}px ${-row * frame}px`;
+    this.schedule();
   }
 
   /** A press that moves more than a few pixels drags the window; otherwise it's a click. */

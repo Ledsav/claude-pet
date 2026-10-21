@@ -29,11 +29,13 @@ const sin = (i, n, phase = 0) => Math.sin(((i + phase) / n) * Math.PI * 2);
  * fx = overlay effects.
  */
 const ANIMS = {
-  idle: { fps: 6, loop: true, frames: range(8, (i, n) => ({
-    sx: 1 + 0.025 * sin(i, n), sy: 1 - 0.025 * sin(i, n),
-    eyes: i === 5 ? "blink" : "open", mouth: "smile", a: 0.3, t: i / n,
+  // Resting loops stay calm: a faint breath, long holds, and the occasional blink or hop.
+  // `durations` (ms per frame) overrides fps where a frame should linger.
+  idle: { fps: 2, loop: true, durations: [900, 900, 900, 900, 900, 900, 900, 130], frames: range(8, (i) => ({
+    sx: 1 + 0.008 * Math.sin((i / 7) * Math.PI * 2), sy: 1 - 0.008 * Math.sin((i / 7) * Math.PI * 2),
+    eyes: i === 7 ? "blink" : "open", mouth: "smile", a: 0.3, t: 0,
   })) },
-  happy: { fps: 9, loop: true, frames: [
+  happy: { fps: 9, loop: true, durations: [3500, 110, 110, 110, 110, 110, 110, 900], frames: [
     { sx: 1, sy: 1, eyes: "open", mouth: "grin", a: 1, t: 0 },
     { sx: 1.08, sy: 0.9, eyes: "happy", mouth: "grin", a: 0.8, t: 0.12 },
     { sx: 0.95, sy: 1.06, ty: -8, eyes: "happy", mouth: "grin", a: 1, t: 0.25 },
@@ -47,7 +49,7 @@ const ANIMS = {
     sx: 1 + 0.015 * sin(i, n), sy: 0.97 - 0.015 * sin(i, n),
     eyes: "sad", mouth: "frown", a: -0.9, t: i / n, fx: i >= 2 && i <= 4 ? { tear: (i - 2) / 2 } : {},
   })) },
-  hungry: { fps: 8, loop: true, frames: range(8, (i) => ({
+  hungry: { fps: 8, loop: true, durations: [1200, 1200, 1200, 600, 90, 90, 90, 600], frames: range(8, (i) => ({
     tx: [0, 0, 0, 0, -2, 2, -1.5, 1][i], sx: 1, sy: 0.99,
     eyes: "open", mouth: i >= 4 ? "open" : "openSmall", a: -0.4, t: i / 8,
   })) },
@@ -245,7 +247,10 @@ const meta = {
   rows: names.length,
   skins: Object.fromEntries(Object.entries(SKINS).map(([id, s]) => [id, s.label])),
   anims: Object.fromEntries(
-    names.map((name, row) => [name, { row, frames: ANIMS[name].frames.length, fps: ANIMS[name].fps, loop: ANIMS[name].loop }]),
+    names.map((name, row) => {
+      const { frames, fps, loop, durations } = ANIMS[name];
+      return [name, { row, frames: frames.length, loop, durations: durations ?? frames.map(() => Math.round(1000 / fps)) }];
+    }),
   ),
 };
 writeFileSync(join(ROOT, "src/sprites.json"), JSON.stringify(meta, null, 2) + "\n");

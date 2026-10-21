@@ -22,6 +22,7 @@ const COMMANDS: { cmd: string; hint: string; args?: Arg[]; keys?: Arg[] }[] = [
   },
   { cmd: "motivate", hint: "pep talk right now" },
   { cmd: "stats", hint: "exact stat numbers" },
+  { cmd: "doctor", hint: "check claude is set up" },
   { cmd: "personality", hint: "edit my personality file", args: [{ name: "reset", hint: "restore the default" }] },
   { cmd: "clear", hint: "forget our conversation" },
   { cmd: "reset", hint: "hatch a new pet", args: [{ name: "confirm", hint: "yes, really" }] },

@@ -184,6 +184,7 @@ async fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> R
             };
             Ok(text)
         }
+        Command::Doctor => chat::check_cli().await,
         Command::Stats => Ok(with_pet(&app, |pet| pet.describe())),
         Command::Clear => {
             state.history.lock().unwrap().clear();

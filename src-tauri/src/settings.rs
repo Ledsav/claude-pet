@@ -146,12 +146,13 @@ pub enum Command {
     Set(String, String),
     Personality { reset: bool },
     Motivate,
+    Doctor,
     Stats,
     Clear,
     Reset { confirmed: bool },
 }
 
-pub const HELP: &str = "/settings · /settings <key> <value> · /motivate · /stats · /personality [reset] · /clear · /reset";
+pub const HELP: &str = "/settings · /settings <key> <value> · /motivate · /stats · /doctor · /personality [reset] · /clear · /reset";
 
 pub fn parse(input: &str) -> Result<Command, String> {
     let input = input.trim().trim_start_matches('/');
@@ -166,6 +167,7 @@ pub fn parse(input: &str) -> Result<Command, String> {
         }
         "personality" => Ok(Command::Personality { reset: rest == "reset" }),
         "motivate" | "pep" => Ok(Command::Motivate),
+        "doctor" => Ok(Command::Doctor),
         "stats" => Ok(Command::Stats),
         "clear" => Ok(Command::Clear),
         "reset" => Ok(Command::Reset { confirmed: rest == "confirm" }),

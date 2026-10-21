@@ -110,5 +110,7 @@ void onNudge(speak);
 void Promise.all([getPet(), getSettings()]).then(([p, s]) => {
   pet.setSkin(s.skin);
   render(p);
+  // First-run help for colleagues who don't have Claude Code yet.
+  runCommand("/doctor").catch((err) => say(String(err), 0));
   say(p.asleep ? "zzz…" : `hi! i'm ${s.name.toLowerCase()}. type /help for commands`);
 });

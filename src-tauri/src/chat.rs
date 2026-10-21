@@ -149,10 +149,39 @@ fn cli_path() -> PathBuf {
     }
 }
 
+pub const INSTALL_HELP: &str = "i need Claude Code to think! install it from claude.com/claude-code, \
+     run `claude` once in a terminal to log in, then type /doctor";
+const LOGIN_HELP: &str = "my brain isn't logged in. open a terminal, run `claude` and log in, then try again";
+
+/// A `claude` process that never flashes a console window.
+fn cli_command() -> tokio::process::Command {
+    let mut cmd = tokio::process::Command::new(cli_path());
+    cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).kill_on_drop(true);
+    #[cfg(windows)]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd
+}
+
+/// Checks the CLI is installed, for `/doctor` and the first-run check.
+pub async fn check_cli() -> Result<String, String> {
+    let mut cmd = cli_command();
+    cmd.arg("--version");
+    match tokio::time::timeout(Duration::from_secs(20), cmd.output()).await {
+        Ok(Ok(out)) if out.status.success() => {
+            let version = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            Ok(format!("brain found: claude {version}. if chat fails, run `claude` in a terminal to log in"))
+        }
+        _ => Err(INSTALL_HELP.into()),
+    }
+}
+
 /// Runs `claude -p <prompt>` in the brain folder with every tool disabled,
 /// so the pet can only talk.
 pub async fn ask_claude(brain: &Path, model: &str, prompt: &str) -> Result<String, String> {
-    let mut cmd = tokio::process::Command::new(cli_path());
+    let mut cmd = cli_command();
     cmd.arg("-p")
         .arg(prompt)
         .args(["--model", model])
@@ -161,26 +190,21 @@ pub async fn ask_claude(brain: &Path, model: &str, prompt: &str) -> Result<Strin
         .arg("--no-session-persistence")
         // Skip the user's global settings (hooks, plugins) so they can't leak into replies.
         .args(["--setting-sources", "project,local"])
-        .current_dir(brain)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .kill_on_drop(true);
-    #[cfg(windows)]
-    {
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+        .current_dir(brain);
 
     let output = tokio::time::timeout(CLI_TIMEOUT, cmd.output())
         .await
         .map_err(|_| "i zoned out… (claude took too long)".to_string())?
-        .map_err(|e| format!("can't find my brain (is `claude` installed?): {e}"))?;
+        .map_err(|_| INSTALL_HELP.to_string())?;
 
     let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
     if !output.status.success() || stdout.is_empty() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let detail = stderr.lines().chain(stdout.lines()).find(|l| !l.trim().is_empty()).unwrap_or("no output");
+        let lower = detail.to_lowercase();
+        if ["login", "log in", "api key", "auth"].iter().any(|k| lower.contains(k)) {
+            return Err(LOGIN_HELP.into());
+        }
         return Err(format!("brain fog… ({detail})"));
     }
     Ok(stdout)

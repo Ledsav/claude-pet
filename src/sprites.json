@@ -13,62 +13,142 @@
     "idle": {
       "row": 0,
       "frames": 8,
-      "fps": 6,
-      "loop": true
+      "loop": true,
+      "durations": [
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        130
+      ]
     },
     "happy": {
       "row": 1,
       "frames": 8,
-      "fps": 9,
-      "loop": true
+      "loop": true,
+      "durations": [
+        3500,
+        110,
+        110,
+        110,
+        110,
+        110,
+        110,
+        900
+      ]
     },
     "sad": {
       "row": 2,
       "frames": 6,
-      "fps": 4,
-      "loop": true
+      "loop": true,
+      "durations": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        250
+      ]
     },
     "hungry": {
       "row": 3,
       "frames": 8,
-      "fps": 8,
-      "loop": true
+      "loop": true,
+      "durations": [
+        1200,
+        1200,
+        1200,
+        600,
+        90,
+        90,
+        90,
+        600
+      ]
     },
     "tired": {
       "row": 4,
       "frames": 6,
-      "fps": 4,
-      "loop": true
+      "loop": true,
+      "durations": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        250
+      ]
     },
     "sleep": {
       "row": 5,
       "frames": 8,
-      "fps": 4,
-      "loop": true
+      "loop": true,
+      "durations": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        250,
+        250,
+        250
+      ]
     },
     "eat": {
       "row": 6,
       "frames": 8,
-      "fps": 8,
-      "loop": false
+      "loop": false,
+      "durations": [
+        125,
+        125,
+        125,
+        125,
+        125,
+        125,
+        125,
+        125
+      ]
     },
     "play": {
       "row": 7,
       "frames": 8,
-      "fps": 10,
-      "loop": false
+      "loop": false,
+      "durations": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ]
     },
     "talk": {
       "row": 8,
       "frames": 4,
-      "fps": 8,
-      "loop": true
+      "loop": true,
+      "durations": [
+        125,
+        125,
+        125,
+        125
+      ]
     },
     "wiggle": {
       "row": 9,
       "frames": 6,
-      "fps": 10,
-      "loop": false
+      "loop": false,
+      "durations": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ]
     }
   }
 }
