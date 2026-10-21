@@ -9,25 +9,22 @@ window, cheers you on while you work, and chats through your local Claude Code C
   *Edit personality…* and quit. The tooltip shows current stats.
 - Every 45 minutes (configurable) Mochi pipes up with a short pep talk.
 
-## Share it with colleagues
-
-Each person gets their own pet, save file and personality, and chats run on **their
-own** Claude subscription through their own `claude` CLI. Nothing is shared or uploaded.
-
-**To hand it out:** build the installer (see *Develop*) and share
-`src-tauri/target/release/bundle/nsis/Claude Pet_<version>_x64-setup.exe`
-(Teams/Slack/shared drive).
-
-**What each colleague does:**
+## Install (Windows)
 
 1. Install [Claude Code](https://claude.com/claude-code) and run `claude` once in a
    terminal to log in.
-2. Run the `Claude Pet … setup.exe`. It installs per-user (no admin needed). The
-   installer isn't code-signed, so Windows SmartScreen may warn: *More info → Run anyway*.
+2. Download `Claude Pet_<version>_x64-setup.exe` from the
+   [latest release](../../releases/latest) and run it. It installs per-user (no admin
+   needed). The installer isn't code-signed yet, so Windows SmartScreen may warn:
+   *More info → Run anyway*.
 3. Mochi appears bottom-right. If Claude Code is missing it says so; `/doctor` re-checks.
-4. Optional: `/settings skin spark` (or blob, sprout, beancat, ember), `/settings name …`.
+4. Optional: `/settings skin spine` (or blob, sprout, beancat, ember, spark), `/settings name …`.
 
-They can also build from source: clone this repo and follow *Develop*.
+Everyone gets their own pet, save file and personality, and chats run on **their own**
+Claude subscription through their own `claude` CLI. To update, run the newer installer
+over the old one; stats and settings are kept.
+
+You can also build from source: clone this repo and follow *Develop*.
 
 ## Chat commands
 
@@ -110,3 +107,33 @@ Build the installer:
 ```bash
 npm run tauri build
 ```
+
+### Releasing
+
+Bump `version` in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`,
+commit, then push a matching tag:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+The *Release* workflow runs the tests, builds the installer on GitHub Actions and
+publishes it as a GitHub Release.
+
+## Code signing policy
+
+Release installers are built only by the *Release* workflow on GitHub Actions, from the
+source in this repository. Nothing built on a personal machine is published.
+Releases are currently unsigned; free signing through the SignPath Foundation has been
+requested.
+
+- Committers and reviewers: [Alberto Valdes Rey](https://github.com/)
+- Approver of each release: Alberto Valdes Rey
+
+**Privacy:** the app sends your chat messages, the pet's name and its current stats to
+Anthropic through the Claude Code CLI you installed and logged in to, only when you chat
+or a pep talk is due. It sends nothing anywhere else, and has no telemetry.
+
+## License
+
+[MIT](LICENSE)
