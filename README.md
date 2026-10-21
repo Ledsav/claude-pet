@@ -3,18 +3,35 @@
 A tiny desktop pet (Mochi) that lives in a transparent, frameless, always-on-top
 window, cheers you on while you work, and chats through your local Claude Code CLI.
 
+<p align="center">
+  <img src="docs/images/skins.webp" alt="The five skins: Blob, Sprout, Bean Cat, Ember and Spine, cheering, eating, playing, chatting and falling asleep" width="790">
+</p>
+
+<p align="center"><a href="https://github.com/Ledsav/claude-pet/releases/latest"><b>Download for Windows</b></a></p>
+
 - **Drag** the pet anywhere; **click** it for a wiggle.
 - **Hover** to see food / mood / energy, the **feed**, **play**, **sleep** buttons and a chat box.
 - **Tray icon**: left-click shows/hides the pet; right-click for feed, play, sleep,
   *Edit personality…* and quit. The tooltip shows current stats.
 - Every 45 minutes (configurable) Mochi pipes up with a short pep talk.
 
+## Moods
+
+Food, mood and energy drain over time (even while the app is closed), and the pet shows it.
+Pick the **Spine** skin and Mochi is replaced by **Spiny**, a sarcastic spine with its own
+much ruder personality.
+
+| | Happy | Sad | Hungry | Tired | Asleep | Goodbye |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Mochi** | <img src="docs/images/blob-happy.webp" width="96" alt="Mochi happy"> | <img src="docs/images/blob-sad.webp" width="96" alt="Mochi sad"> | <img src="docs/images/blob-hungry.webp" width="96" alt="Mochi hungry"> | <img src="docs/images/blob-tired.webp" width="96" alt="Mochi tired"> | <img src="docs/images/blob-sleep.webp" width="96" alt="Mochi asleep"> | <img src="docs/images/blob-bye.webp" width="96" alt="Mochi waving goodbye"> |
+| **Spiny** | <img src="docs/images/spine-happy.webp" width="96" alt="Spiny happy"> | <img src="docs/images/spine-sad.webp" width="96" alt="Spiny sad"> | <img src="docs/images/spine-hungry.webp" width="96" alt="Spiny hungry"> | <img src="docs/images/spine-tired.webp" width="96" alt="Spiny tired"> | <img src="docs/images/spine-sleep.webp" width="96" alt="Spiny asleep"> | <img src="docs/images/spine-bye.webp" width="96" alt="Spiny giving up the ghost"> |
+
 ## Install (Windows)
 
 1. Install [Claude Code](https://claude.com/claude-code) and run `claude` once in a
    terminal to log in.
 2. Download `Claude Pet_<version>_x64-setup.exe` from the
-   [latest release](../../releases/latest) and run it. It installs per-user (no admin
+   [latest release](https://github.com/Ledsav/claude-pet/releases/latest) and run it. It installs per-user (no admin
    needed). The installer isn't code-signed yet, so Windows SmartScreen may warn:
    *More info → Run anyway*.
 3. Mochi appears bottom-right. If Claude Code is missing it says so; `/doctor` re-checks.
