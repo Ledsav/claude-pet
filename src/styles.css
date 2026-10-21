@@ -1,0 +1,394 @@
+:root {
+  --ink: #2b1b17;
+  --paper: #fffaf6;
+  --paper-edge: #ecd9cc;
+  --muted: #8a7168;
+  --accent: #d9643f;
+  --good: #6aa86b;
+  --warn: #e0a43a;
+  --bad: #d65745;
+  --pet-size: 128px;
+  --panel-h: 168px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  position: relative;
+  height: 100%;
+}
+
+/* ---------- pet ---------- */
+
+.pet {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: var(--pet-size);
+  height: var(--pet-size);
+  translate: -50% 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.pet-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pet-svg * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.shadow {
+  fill: rgba(43, 27, 23, 0.18);
+}
+
+.foot {
+  fill: #c4552f;
+}
+
+.body-group {
+  transform-origin: 50% 100%;
+  animation: breathe 3.2s ease-in-out infinite;
+}
+
+.eye ellipse {
+  fill: var(--ink);
+}
+
+.glint {
+  fill: #fff;
+}
+
+.eyes-open {
+  animation: blink 5s infinite;
+}
+
+.eyes-closed path,
+.eyes-tired path,
+.mouth:not(.mouth-open) {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.mouth-open {
+  fill: var(--ink);
+}
+
+.cheek {
+  fill: #f7b6a3;
+  opacity: 0.75;
+}
+
+.eyes-closed,
+.eyes-tired,
+.mouth,
+.zzz,
+.heart {
+  display: none;
+}
+
+.zzz text {
+  font: 700 14px "Segoe UI", sans-serif;
+  fill: var(--muted);
+}
+
+.heart {
+  fill: #e5566b;
+}
+
+/* moods: which face parts are shown */
+.pet[data-mood="happy"] .mouth-smile,
+.pet[data-mood="neutral"] .mouth-smile,
+.pet[data-mood="tired"] .mouth-flat,
+.pet[data-mood="sleeping"] .mouth-flat,
+.pet[data-mood="sad"] .mouth-frown,
+.pet[data-mood="hungry"] .mouth-open {
+  display: inline;
+}
+
+.pet[data-mood="happy"] .cheek {
+  opacity: 1;
+}
+
+.pet[data-mood="happy"] .body-group {
+  animation: hop 2.4s ease-in-out infinite;
+}
+
+.pet[data-mood="sad"] .eye {
+  transform: translateY(2px) scaleY(0.8);
+}
+
+.pet[data-mood="hungry"] .body-group {
+  animation: breathe 3.2s ease-in-out infinite, grumble 4s ease-in-out infinite;
+}
+
+.pet[data-mood="tired"] .eyes-open,
+.pet[data-mood="sleeping"] .eyes-open {
+  display: none;
+}
+
+.pet[data-mood="tired"] .eyes-tired,
+.pet[data-mood="sleeping"] .eyes-closed,
+.pet[data-mood="sleeping"] .zzz {
+  display: inline;
+}
+
+.pet[data-mood="sleeping"] .body-group {
+  animation: breathe 5s ease-in-out infinite;
+}
+
+.pet[data-mood="sleeping"] .zzz text {
+  animation: float-z 2.6s ease-out infinite;
+}
+
+.pet[data-mood="sleeping"] .zzz text:nth-child(2) {
+  animation-delay: 1.3s;
+}
+
+/* one-shot animations override the mood face where needed */
+.pet[data-anim="wiggle"] .body-group {
+  animation: wiggle 0.9s ease-in-out;
+}
+
+.pet[data-anim="wiggle"] .heart,
+.pet[data-anim="play"] .heart {
+  display: inline;
+  animation: float-heart 1.2s ease-out forwards;
+}
+
+.pet[data-anim="eat"] .mouth {
+  display: none;
+}
+
+.pet[data-anim="eat"] .mouth-open {
+  display: inline;
+  animation: chomp 0.3s ease-in-out infinite;
+}
+
+.pet[data-anim="play"] .body-group {
+  animation: jump 0.6s cubic-bezier(0.3, 0, 0.4, 1) 2;
+}
+
+.pet[data-anim="talk"] .mouth-open {
+  display: inline;
+  animation: chomp 0.22s ease-in-out infinite;
+}
+
+.pet[data-anim="talk"] .mouth:not(.mouth-open) {
+  display: none;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.03, 0.97);
+  }
+}
+
+@keyframes hop {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  78% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+  86% {
+    transform: translateY(-8px) scale(0.96, 1.05);
+  }
+  94% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+}
+
+@keyframes grumble {
+  0%,
+  88%,
+  100% {
+    translate: 0 0;
+  }
+  91% {
+    translate: -2px 0;
+  }
+  94% {
+    translate: 2px 0;
+  }
+  97% {
+    translate: -1px 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  50% {
+    transform: translateY(-22px) scale(0.94, 1.08);
+  }
+  85% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+}
+
+@keyframes chomp {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.2);
+  }
+}
+
+@keyframes float-z {
+  from {
+    opacity: 0;
+    transform: translate(0, 6px);
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(6px, -10px);
+  }
+}
+
+@keyframes float-heart {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(1);
+  }
+}
+
+/* ---------- speech bubble ---------- */
+
+.bubble {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--pet-size) + 4px);
+  padding: 8px 11px;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(43, 27, 23, 0.12);
+  line-height: 1.35;
+  max-height: 110px;
+  overflow-y: auto;
+  user-select: text;
+  opacity: 0;
+  translate: 0 6px;
+  pointer-events: none;
+  transition: opacity 0.18s ease, translate 0.18s ease, bottom 0.2s ease;
+}
+
+.bubble.show {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  background: var(--paper);
+  border-right: 1px solid var(--paper-edge);
+  border-bottom: 1px solid var(--paper-edge);
+  translate: -50% 0;
+  rotate: 45deg;
+}
+
+.bubble.thinking::before {
+  content: "";
+  display: inline-block;
+  width: 26px;
+  height: 8px;
+  background: radial-gradient(circle, var(--muted) 3px, transparent 3.5px) 0 0 / 9px 8px repeat-x;
+  animation: dots 1s steps(3) infinite;
+}
+
+@keyframes dots {
+  from {
+    width: 0;
+  }
+  to {
+    width: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

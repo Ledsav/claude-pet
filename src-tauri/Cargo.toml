@@ -1,0 +1,19 @@
+[package]
+name = "claude-pet"
+version = "0.1.0"
+description = "A tiny desktop pet that chats through the local Claude Code CLI"
+edition = "2021"
+
+[lib]
+name = "claude_pet_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["process", "time"] }
