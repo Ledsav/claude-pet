@@ -72,20 +72,39 @@ impl History {
     }
 }
 
-/// The folder `claude` runs in. Claude Code picks up its CLAUDE.md as the pet's personality.
-pub fn brain_dir(data_dir: &Path) -> std::io::Result<PathBuf> {
-    let dir = data_dir.join("brain");
+/// Skins that come with a personality of their own. Every other skin shares the main one.
+const SKIN_PERSONALITIES: [(&str, &str); 1] = [("spine", include_str!("../personality/spine.md"))];
+
+fn skin_personality(skin: &str) -> Option<&'static str> {
+    SKIN_PERSONALITIES.iter().find(|(s, _)| *s == skin).map(|(_, text)| *text)
+}
+
+/// Whether picking this skin swaps in its own personality.
+pub fn has_own_personality(skin: &str) -> bool {
+    skin_personality(skin).is_some()
+}
+
+/// The built-in personality for a skin.
+pub fn default_personality(skin: &str) -> &'static str {
+    skin_personality(skin).unwrap_or(DEFAULT_PERSONALITY)
+}
+
+/// The folder `claude` runs in for this skin. Claude Code picks up its CLAUDE.md as the
+/// pet's personality. Skins with their own personality get their own folder, so switching
+/// skins never overwrites the user's edits to another one.
+pub fn brain_dir(data_dir: &Path, skin: &str) -> std::io::Result<PathBuf> {
+    let dir = if has_own_personality(skin) { data_dir.join(format!("brain-{skin}")) } else { data_dir.join("brain") };
     fs::create_dir_all(&dir)?;
     let file = dir.join("CLAUDE.md");
     if !file.exists() {
-        fs::write(&file, DEFAULT_PERSONALITY)?;
+        fs::write(&file, default_personality(skin))?;
     }
     Ok(dir)
 }
 
-/// Overwrites the personality with the built-in default.
-pub fn reset_personality(brain: &Path) -> std::io::Result<()> {
-    fs::write(brain.join("CLAUDE.md"), DEFAULT_PERSONALITY)
+/// Overwrites the personality with the skin's built-in default.
+pub fn reset_personality(brain: &Path, skin: &str) -> std::io::Result<()> {
+    fs::write(brain.join("CLAUDE.md"), default_personality(skin))
 }
 
 /// Prompt for an unprompted pep talk.
@@ -277,12 +296,30 @@ mod tests {
     #[test]
     fn brain_is_seeded_once_and_user_edits_survive() {
         let dir = std::env::temp_dir().join(format!("claude-pet-brain-{}", crate::stats::now_ms()));
-        let brain = brain_dir(&dir).unwrap();
+        let brain = brain_dir(&dir, "blob").unwrap();
         let file = brain.join("CLAUDE.md");
         assert_eq!(fs::read_to_string(&file).unwrap(), DEFAULT_PERSONALITY);
         fs::write(&file, "custom").unwrap();
-        brain_dir(&dir).unwrap();
+        brain_dir(&dir, "blob").unwrap();
         assert_eq!(fs::read_to_string(&file).unwrap(), "custom");
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn spine_has_its_own_personality_and_others_share_one() {
+        let dir = std::env::temp_dir().join(format!("claude-pet-skins-{}", crate::stats::now_ms()));
+        let main = brain_dir(&dir, "blob").unwrap();
+        assert_eq!(brain_dir(&dir, "sprout").unwrap(), main, "ordinary skins share a brain");
+        let spine = brain_dir(&dir, "spine").unwrap();
+        assert_ne!(spine, main);
+        let text = fs::read_to_string(spine.join("CLAUDE.md")).unwrap();
+        assert!(text.contains("spine") && text.contains("sarcastic"));
+
+        // Editing one never touches the other, and reset restores the right default.
+        fs::write(main.join("CLAUDE.md"), "my edits").unwrap();
+        reset_personality(&spine, "spine").unwrap();
+        assert_eq!(fs::read_to_string(main.join("CLAUDE.md")).unwrap(), "my edits");
+        assert_eq!(fs::read_to_string(spine.join("CLAUDE.md")).unwrap(), default_personality("spine"));
         fs::remove_dir_all(dir).unwrap();
     }
 
@@ -291,7 +328,7 @@ mod tests {
     #[ignore]
     fn real_claude_replies_in_character() {
         let dir = std::env::temp_dir().join(format!("claude-pet-live-{}", crate::stats::now_ms()));
-        let brain = brain_dir(&dir).unwrap();
+        let brain = brain_dir(&dir, "blob").unwrap();
         let prompt = build_prompt("Mochi", "food 20/100 (low = starving), mood 60/100, energy 70/100, awake", &History::default(), "hi! what's your name?");
         let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
         let reply = rt.block_on(ask_claude(&brain, "haiku", &prompt)).unwrap();

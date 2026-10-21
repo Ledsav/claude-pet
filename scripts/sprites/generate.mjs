@@ -142,7 +142,22 @@ function mouth(kind, y, cat) {
 }
 
 function face(p, skin) {
-  const { eyeY, eyeDX, mouthY, cheek = "#F7A48E", cat } = skin.face;
+  const out = faceParts(p, skin);
+  return skin.faceTransform ? `<g transform="${skin.faceTransform(p)}">${out}</g>` : out;
+}
+
+function faceParts(p, skin) {
+  const { eyeY, eyeDX, mouthY, cheek = "#F7A48E", cat, grumpy } = skin.face;
+  if (grumpy) {
+    // Unimpressed: flat brows over open eyes, and a lopsided smirk instead of a smile.
+    const brows = p.eyes === "open" || p.eyes === "blink"
+      ? `<path d="M${64 - eyeDX - 6} ${eyeY - 8}h11M${64 + eyeDX - 5} ${eyeY - 9}l11 1.5" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"/>`
+      : "";
+    const m = p.mouth === "smile"
+      ? `<path d="M58 ${mouthY + 1}q7 2.5 12 -3" stroke="${INK}" stroke-width="2.8" stroke-linecap="round" fill="none"/>`
+      : mouth(p.mouth, mouthY);
+    return eye(p.eyes, 64 - eyeDX, eyeY, -1) + eye(p.eyes, 64 + eyeDX, eyeY, 1) + brows + m;
+  }
   const cheeks = `<ellipse cx="${64 - eyeDX - 9}" cy="${eyeY + 9}" rx="5.5" ry="3.2" fill="${cheek}" opacity="${p.eyes === "happy" ? 0.95 : 0.7}"/>
     <ellipse cx="${64 + eyeDX + 9}" cy="${eyeY + 9}" rx="5.5" ry="3.2" fill="${cheek}" opacity="${p.eyes === "happy" ? 0.95 : 0.7}"/>`;
   return cheeks + eye(p.eyes, 64 - eyeDX, eyeY, -1) + eye(p.eyes, 64 + eyeDX, eyeY, 1) + mouth(p.mouth, mouthY, cat);

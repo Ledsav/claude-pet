@@ -66,6 +66,16 @@ h1 {
   max-width: 60ch;
 }
 
+.which {
+  margin: 8px 0 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--hover);
+  color: var(--ink);
+  font-size: 13px;
+  width: fit-content;
+}
+
 .tips {
   color: var(--muted);
   font-size: 13px;

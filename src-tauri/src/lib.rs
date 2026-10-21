@@ -25,11 +25,21 @@ pub struct AppState {
     store: Store,
     settings: Mutex<Settings>,
     data_dir: PathBuf,
-    /// Folder whose CLAUDE.md is the pet's personality.
-    pub brain: PathBuf,
     limiter: Mutex<RateLimiter>,
     history: Mutex<History>,
     thinking: AtomicBool,
+}
+
+impl AppState {
+    /// Folder whose CLAUDE.md is the current skin's personality (created on first use).
+    pub fn brain(&self) -> PathBuf {
+        let skin = self.settings.lock().unwrap().skin.clone();
+        chat::brain_dir(&self.data_dir, &skin).unwrap_or_else(|_| self.data_dir.join("brain"))
+    }
+
+    pub fn skin(&self) -> String {
+        self.settings.lock().unwrap().skin.clone()
+    }
 }
 
 /// Clears the "thinking" flag however the chat call ends.
@@ -113,7 +123,7 @@ async fn ask_pet(app: &AppHandle, state: &AppState, message: Option<String>) -> 
             None => chat::build_nudge_prompt(&name, &status, &history),
         }
     };
-    let reply = chat::ask_claude(&state.brain, &model, &prompt).await?;
+    let reply = chat::ask_claude(&state.brain(), &model, &prompt).await?;
 
     let said = message.unwrap_or_else(|| "(you cheered them on unprompted)".into());
     state.history.lock().unwrap().push(said, reply.clone());
@@ -191,6 +201,10 @@ async fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> R
                 }
                 (msg, s.clone())
             };
+            if key == "skin" {
+                // A different body may come with a different personality; start fresh.
+                state.history.lock().unwrap().clear();
+            }
             apply_settings(&app, &updated.1);
             Ok(updated.0)
         }
@@ -199,7 +213,7 @@ async fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> R
             Ok("opening my personality editor… save it and i'll change on the next chat".into())
         }
         Command::Personality { reset: true } => {
-            chat::reset_personality(&state.brain).map_err(|e| format!("couldn't reset: {e}"))?;
+            chat::reset_personality(&state.brain(), &state.skin()).map_err(|e| format!("couldn't reset: {e}"))?;
             Ok("personality restored to the default. hi again!".into())
         }
         Command::Motivate => {
@@ -265,6 +279,7 @@ pub fn run() {
             command,
             quit,
             personality::open_personality,
+            personality::personality_info,
             personality::get_personality,
             personality::save_personality,
             personality::reset_personality,
@@ -281,7 +296,6 @@ pub fn run() {
                 store,
                 settings: Mutex::new(settings.clone()),
                 data_dir: data_dir.clone(),
-                brain: chat::brain_dir(&data_dir)?,
                 limiter: Mutex::new(RateLimiter::new(
                     Duration::from_secs(4),
                     hourly_limit,

@@ -9,6 +9,69 @@ function gradient(id, light, dark) {
   return `<radialGradient id="${id}" cx="40%" cy="32%" r="72%"><stop offset="0" stop-color="${light}"/><stop offset="1" stop-color="${dark}"/></radialGradient>`;
 }
 
+const BONE = "#C9BB9F";
+const WING = "#E4D9C2";
+
+/**
+ * Builds a grumpy-spine skin. Posture tracks mood: upright when perky, slumped when low.
+ * `segs` go bottom → top as { y, w, h }; `head` is the top bone that carries the face.
+ */
+function spineSkin({ label, segs, head, face }) {
+  const n = segs.length;
+  const pivot = head.y + head.h; // the head tilts around its base
+  const bend = (p) => ({ slouch: (1 - p.a) * 4.5, sway: wave(p.t) * 1.2 });
+  // Sideways offset at height `k` (0 = sacrum … n = head): one smooth curve.
+  const offset = (k, { slouch, sway }) => {
+    const up = k / n;
+    return -slouch * 1.3 * up * up + sway * up;
+  };
+  const headTransform = (p) => {
+    const b = bend(p);
+    return `translate(${offset(n + 0.2, b).toFixed(1)} 0) rotate(${(-b.slouch * 1.3 + b.sway).toFixed(1)} 64 ${pivot})`;
+  };
+
+  const headSvg = `<rect x="${64 - head.w / 2}" y="${head.y}" width="${head.w}" height="${head.h}" rx="${head.rx}" fill="url(#bone-g)" stroke="${BONE}" stroke-width="1.2"/>`;
+
+  return {
+    label,
+    defs: `${gradient("bone-g", "#FBF6EA", "#D9CDB4")}
+      <linearGradient id="disc-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#EDA7A0"/><stop offset="1" stop-color="#D98C86"/></linearGradient>`,
+    face: { cheek: "#E9B9A8", grumpy: true, ...face },
+    draw: (p) => {
+      const b = bend(p);
+      let out = `<path d="M51 101h26q-3 10-13 12q-10-2-13-12z" fill="url(#bone-g)" stroke="${BONE}" stroke-width="1"/>
+        <path d="M58 104h12M60 108h8" stroke="${BONE}" stroke-width="1.4" stroke-linecap="round"/>`;
+      segs.forEach((s, i) => {
+        const x = 64 + offset(i + 0.5, b);
+        const top = s.y - s.h / 2;
+        const wl = x - s.w / 2;
+        const wr = x + s.w / 2;
+        const wing = Math.max(5, s.w * 0.28);
+        out += `<rect x="${(wl + 3).toFixed(1)}" y="${(s.y + s.h / 2 - 0.6).toFixed(1)}" width="${s.w - 6}" height="${Math.max(2.4, s.h * 0.3).toFixed(1)}" rx="1.3" fill="url(#disc-g)"/>`;
+        out += `<path d="M${(wl + 2).toFixed(1)} ${(top + 1.5).toFixed(1)}L${(wl - wing).toFixed(1)} ${(s.y + 1.5).toFixed(1)}L${(wl + 2).toFixed(1)} ${(s.y + s.h * 0.35).toFixed(1)}z
+          M${(wr - 2).toFixed(1)} ${(top + 1.5).toFixed(1)}L${(wr + wing).toFixed(1)} ${(s.y + 1.5).toFixed(1)}L${(wr - 2).toFixed(1)} ${(s.y + s.h * 0.35).toFixed(1)}z" fill="${WING}" stroke="${BONE}" stroke-width="1" stroke-linejoin="round"/>`;
+        out += `<rect x="${wl.toFixed(1)}" y="${top.toFixed(1)}" width="${s.w}" height="${s.h}" rx="${(s.h / 2.2).toFixed(1)}" fill="url(#bone-g)" stroke="${BONE}" stroke-width="1"/>`;
+      });
+      return `${out}<g transform="${headTransform(p)}">${headSvg}
+        <path d="M${64 - head.w / 2 + 6} ${head.y + 8}q5-4 12-4" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".7"/></g>`;
+    },
+    faceTransform: headTransform,
+  };
+}
+
+/** Evenly stacked vertebrae from just above the sacrum up to `topY`, tapering in width. */
+function column(count, topY, wBottom, wTop, hBottom, hTop) {
+  const bottomY = 96;
+  return Array.from({ length: count }, (_, i) => {
+    const t = count === 1 ? 0 : i / (count - 1);
+    return {
+      y: bottomY - (bottomY - topY) * t,
+      w: wBottom + (wTop - wBottom) * t,
+      h: hBottom + (hTop - hBottom) * t,
+    };
+  });
+}
+
 export const SKINS = {
   blob: {
     label: "Blob",
@@ -74,6 +137,14 @@ export const SKINS = {
       <ellipse cx="64" cy="86" rx="26" ry="22" fill="url(#ember-core)" opacity="${glow.toFixed(2)}"/>`;
     },
   },
+
+  // A grumpy human spine: a tall column of vertebrae, the top one just big enough for a face.
+  spine: spineSkin({
+    label: "Spine",
+    segs: column(7, 50, 30, 22, 7.5, 6.5),
+    head: { y: 18, w: 34, h: 26, rx: 10 },
+    face: { eyeY: 31, eyeDX: 8, mouthY: 39 },
+  }),
 
   // Inspired by Claude's spark mark: clay rays radiating from a round core that holds the face.
   spark: {

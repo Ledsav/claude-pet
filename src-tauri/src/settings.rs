@@ -23,7 +23,7 @@ pub struct Settings {
 }
 
 /// Must match the sheets in public/sprites (see scripts/sprites/skins.mjs).
-pub const SKINS: [&str; 5] = ["blob", "sprout", "beancat", "ember", "spark"];
+pub const SKINS: [&str; 6] = ["blob", "sprout", "beancat", "ember", "spark", "spine"];
 
 impl Default for Settings {
     fn default() -> Self {
@@ -115,8 +115,13 @@ impl Settings {
                 if !SKINS.contains(&value) {
                     return Err(format!("skins: {}", SKINS.join(", ")));
                 }
+                let was_spine = self.skin == "spine";
                 self.skin = value.into();
-                Ok(format!("*poof* new look: {value}!"))
+                Ok(match (was_spine, value == "spine") {
+                    (false, true) => "ugh. fine. i'm a spine now. don't expect me to be nice to you 💀".into(),
+                    (true, false) => format!("*poof* new look: {value}! (the spine says it won't miss you)"),
+                    _ => format!("*poof* new look: {value}!"),
+                })
             }
             "motivate" => {
                 let minutes: u32 = match value {

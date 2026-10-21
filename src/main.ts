@@ -159,5 +159,7 @@ void Promise.all([getPet(), getSettings()]).then(([p, s]) => {
   render(p);
   // First-run help for colleagues who don't have Claude Code yet.
   runCommand("/doctor").catch((err) => say(String(err), 0));
-  say(p.asleep ? "zzz…" : `hi! i'm ${s.name.toLowerCase()}. type /help for commands`);
+  if (p.asleep) say("zzz…");
+  else if (s.skin === "spine") say("oh. it's you. type /help if you must");
+  else say(`hi! i'm ${s.name.toLowerCase()}. type /help for commands`);
 });

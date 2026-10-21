@@ -1,4 +1,4 @@
-//! The personality editor: a normal window for editing the brain folder's CLAUDE.md.
+//! The personality editor: a normal window for editing the current skin's CLAUDE.md.
 
 use crate::{chat, AppState};
 use std::fs;
@@ -27,12 +27,25 @@ pub fn open_editor(app: &AppHandle) {
 }
 
 fn file(state: &AppState) -> std::path::PathBuf {
-    state.brain.join("CLAUDE.md")
+    state.brain().join("CLAUDE.md")
 }
 
 #[tauri::command]
 pub fn open_personality(app: AppHandle) {
     open_editor(&app);
+}
+
+/// Which personality the editor is showing: the shared one, or the skin's own.
+#[derive(serde::Serialize)]
+pub struct PersonalityInfo {
+    skin: String,
+    own: bool,
+}
+
+#[tauri::command]
+pub fn personality_info(state: State<'_, AppState>) -> PersonalityInfo {
+    let skin = state.skin();
+    PersonalityInfo { own: chat::has_own_personality(&skin), skin }
 }
 
 #[tauri::command]
@@ -54,7 +67,7 @@ pub fn save_personality(state: State<'_, AppState>, text: String) -> Result<(), 
 /// Restores the built-in personality and returns it.
 #[tauri::command]
 pub fn reset_personality(state: State<'_, AppState>) -> Result<String, String> {
-    chat::reset_personality(&state.brain).map_err(|e| format!("couldn't reset: {e}"))?;
+    chat::reset_personality(&state.brain(), &state.skin()).map_err(|e| format!("couldn't reset: {e}"))?;
     get_personality(state)
 }
 
