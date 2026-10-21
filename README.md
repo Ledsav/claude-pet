@@ -18,7 +18,7 @@ window, cheers you on while you work, and chats through your local Claude Code C
    needed). The installer isn't code-signed yet, so Windows SmartScreen may warn:
    *More info → Run anyway*.
 3. Mochi appears bottom-right. If Claude Code is missing it says so; `/doctor` re-checks.
-4. Optional: `/settings skin spine` (or blob, sprout, beancat, ember, spark), `/settings name …`.
+4. Optional: `/settings skin spine` (or blob, sprout, beancat, ember), `/settings name …`.
 
 Everyone gets their own pet, save file and personality, and chats run on **their own**
 Claude subscription through their own `claude` CLI. To update, run the newer installer
@@ -34,7 +34,7 @@ Commands are handled by the app and never sent to Claude.
 | Command | Does |
 | --- | --- |
 | `/settings` | Show all settings |
-| `/settings skin <blob\|sprout\|beancat\|ember\|spark\|spine>` | Change how the pet looks (Spine brings its own, much ruder, personality) |
+| `/settings skin <blob\|sprout\|beancat\|ember\|spine>` | Change how the pet looks (Spine brings its own, much ruder, personality) |
 | `/settings name <name>` | Rename the pet |
 | `/settings model <haiku\|sonnet\|opus>` | Claude model for chat (default `haiku`) |
 | `/settings motivate <minutes\|off>` | How often it gives unprompted pep talks (default 45) |
@@ -83,9 +83,6 @@ node scripts/sprites/generate.mjs
 
 To use hand-drawn art instead, replace `public/sprites/<skin>.png` with a sheet of the
 same layout.
-
-The *Spark* skin is inspired by Anthropic's Claude logo. Fine for personal and internal
-use, but swap it out before distributing the app publicly.
 
 ## Develop
 

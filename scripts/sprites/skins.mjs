@@ -145,29 +145,4 @@ export const SKINS = {
     head: { y: 18, w: 34, h: 26, rx: 10 },
     face: { eyeY: 31, eyeDX: 8, mouthY: 39 },
   }),
-
-  // Inspired by Claude's spark mark: clay rays radiating from a round core that holds the face.
-  spark: {
-    label: "Spark",
-    defs: gradient("spark-g", "#E8957A", "#C9603F"),
-    face: { eyeY: 66, eyeDX: 10, mouthY: 78, cheek: "#F2B3A0" },
-    draw: (p) => {
-      const cx = 64;
-      const cy = 68;
-      const spin = wave(p.t) * 4; // a gentle wobble, never a continuous spin
-      const reach = 1 + 0.12 * p.a;
-      const rays = Array.from({ length: 11 }, (_, i) => {
-        const ang = deg(i * (360 / 11) + spin + (i % 3) * 4 - 90);
-        const len = (i % 2 ? 37 : 44) * reach + (i % 3) * 2;
-        // Droop pulls the rays toward the ground when sad or sleepy.
-        const sag = p.a < 0 ? -p.a * 7 * Math.max(0, Math.cos(ang)) ** 2 : 0;
-        const x2 = cx + Math.cos(ang) * len;
-        const y2 = cy + Math.sin(ang) * len + sag;
-        return `<path d="M${cx} ${cy}L${x2.toFixed(1)} ${y2.toFixed(1)}"/>`;
-      }).join("");
-      return `
-      <g stroke="#D97757" stroke-width="10" stroke-linecap="round">${rays}</g>
-      <circle cx="${cx}" cy="${cy}" r="27" fill="url(#spark-g)"/>`;
-    },
-  },
 };

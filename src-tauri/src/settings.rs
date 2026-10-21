@@ -23,7 +23,7 @@ pub struct Settings {
 }
 
 /// Must match the sheets in public/sprites (see scripts/sprites/skins.mjs).
-pub const SKINS: [&str; 6] = ["blob", "sprout", "beancat", "ember", "spark", "spine"];
+pub const SKINS: [&str; 5] = ["blob", "sprout", "beancat", "ember", "spine"];
 
 impl Default for Settings {
     fn default() -> Self {
@@ -45,7 +45,14 @@ impl Settings {
     pub fn load(dir: &Path) -> Self {
         fs::read_to_string(path(dir))
             .ok()
-            .and_then(|s| serde_json::from_str(&s).ok())
+            .and_then(|s| serde_json::from_str::<Self>(&s).ok())
+            .map(|mut s| {
+                // A skin that was removed from the app falls back to the default look.
+                if !SKINS.contains(&s.skin.as_str()) {
+                    s.skin = Self::default().skin;
+                }
+                s
+            })
             .unwrap_or_default()
     }
 
@@ -227,7 +234,7 @@ mod tests {
         assert!(s.set("ontop", "off").is_ok());
         assert!(!s.on_top);
         assert!(s.set("limit", "0").is_err());
-        assert!(s.set("skin", "spark").is_ok());
+        assert!(s.set("skin", "ember").is_ok());
         assert!(s.set("skin", "spine").is_ok());
         assert_eq!(s.display_name(), "Spiny");
         assert_eq!(s.effective_model(), "sonnet");
@@ -251,6 +258,8 @@ mod tests {
         fs::write(dir.join("settings.json"), r#"{"name":"Old"}"#).unwrap();
         let old = Settings::load(&dir);
         assert_eq!((old.name.as_str(), old.speed), ("Old", 1.0));
+        fs::write(dir.join("settings.json"), r#"{"name":"Old","skin":"spark"}"#).unwrap();
+        assert_eq!(Settings::load(&dir).skin, "blob", "a removed skin falls back to the default");
         fs::remove_dir_all(dir).unwrap();
     }
 }

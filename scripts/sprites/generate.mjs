@@ -2,7 +2,7 @@
 // columns = frames) plus src/sprites.json describing the layout.
 //
 //   node scripts/sprites/generate.mjs            # all skins
-//   node scripts/sprites/generate.mjs spark      # just one
+//   node scripts/sprites/generate.mjs ember      # just one
 //
 // Frames are drawn procedurally as SVG, then rendered by headless Chrome/Edge
 // (set CHROME=path to override). Intermediate SVG sheets go to design/sprites/.
