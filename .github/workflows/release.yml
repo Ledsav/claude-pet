@@ -44,6 +44,8 @@ jobs:
           releaseBody: |
             Windows installer. You also need [Claude Code](https://claude.com/claude-code) installed and logged in.
             The installer isn't code-signed yet, so SmartScreen may warn: *More info → Run anyway*.
+
+            **Code signing policy:** free code signing provided by SignPath.io, certificate by SignPath Foundation (applied for; this release is unsigned). See the [code signing policy](https://github.com/Ledsav/claude-pet#code-signing-policy) and [privacy policy](https://github.com/Ledsav/claude-pet/blob/main/PRIVACY.md).
           releaseDraft: false
           prerelease: false
 

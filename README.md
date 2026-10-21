@@ -39,7 +39,11 @@ much ruder personality.
 
 Everyone gets their own pet, save file and personality, and chats run on **their own**
 Claude subscription through their own `claude` CLI. To update, run the newer installer
-over the old one; stats and settings are kept.
+over the old one; stats and settings are kept. What gets sent to Claude is described in
+the [privacy policy](PRIVACY.md).
+
+**Uninstall:** *Settings → Apps → Installed apps → Claude Pet → Uninstall*. To also remove
+the pet's saved data, delete `%APPDATA%\dev.claudepet.desktop\`.
 
 You can also build from source: clone this repo and follow *Develop*.
 
@@ -136,17 +140,19 @@ publishes it as a GitHub Release.
 
 ## Code signing policy
 
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by
+[SignPath Foundation](https://signpath.org/). *(Applied for; releases so far are unsigned.)*
+
 Release installers are built only by the *Release* workflow on GitHub Actions, from the
-source in this repository. Nothing built on a personal machine is published.
-Releases are currently unsigned; free signing through the SignPath Foundation has been
-requested.
+source in this repository, and each signing request is approved by hand.
 
-- Committers and reviewers: [Alberto Valdes Rey](https://github.com/Ledsav)
-- Approver of each release: Alberto Valdes Rey
+- Committers and reviewers: [Alberto Valdes Rey (Ledsav)](https://github.com/Ledsav)
+- Approvers: [Alberto Valdes Rey (Ledsav)](https://github.com/Ledsav)
 
-**Privacy:** the app sends your chat messages, the pet's name and its current stats to
-Anthropic through the Claude Code CLI you installed and logged in to, only when you chat
-or a pep talk is due. It sends nothing anywhere else, and has no telemetry.
+**Privacy:** this program will not transfer any information to other networked systems
+unless specifically requested by the user or the person installing or operating it. Chat
+messages and pep talks go to Anthropic through the Claude Code CLI you installed and
+logged in to; see the [privacy policy](PRIVACY.md) for exactly what is sent.
 
 ## License
 
