@@ -54,12 +54,23 @@ impl Settings {
         fs::write(path(dir), serde_json::to_vec_pretty(self)?)
     }
 
+    /// What the pet is called right now: skins with their own character (Spine → Spiny)
+    /// override the user's chosen name, which is kept for the other skins.
+    pub fn display_name(&self) -> String {
+        crate::chat::persona_name(&self.skin).map(str::to_string).unwrap_or_else(|| self.name.clone())
+    }
+
+    /// The model chat uses right now: a skin's own character may bring its own.
+    pub fn effective_model(&self) -> String {
+        crate::chat::persona_model(&self.skin).map(str::to_string).unwrap_or_else(|| self.model.clone())
+    }
+
     pub fn describe(&self) -> String {
         format!(
             "name: {} · skin: {} · model: {} · speed: {}x · ontop: {} · limit: {}/hour · motivate: {}",
-            self.name,
+            self.display_name(),
             self.skin,
-            self.model,
+            self.effective_model(),
             self.speed,
             if self.on_top { "on" } else { "off" },
             self.hourly_limit,
@@ -71,6 +82,10 @@ impl Settings {
     pub fn set(&mut self, key: &str, value: &str) -> Result<String, String> {
         let value = value.trim();
         match key {
+            "name" if crate::chat::persona_name(&self.skin).is_some() => Err(format!(
+                "{} doesn't do name changes. switch skin to rename your other pet",
+                self.display_name().to_lowercase()
+            )),
             "name" => {
                 let len = value.chars().count();
                 if !(1..=24).contains(&len) {
@@ -213,6 +228,12 @@ mod tests {
         assert!(!s.on_top);
         assert!(s.set("limit", "0").is_err());
         assert!(s.set("skin", "spark").is_ok());
+        assert!(s.set("skin", "spine").is_ok());
+        assert_eq!(s.display_name(), "Spiny");
+        assert_eq!(s.effective_model(), "sonnet");
+        assert!(s.set("name", "Bob").is_err(), "spiny can't be renamed");
+        assert!(s.set("skin", "blob").is_ok());
+        assert_eq!(s.display_name(), "Pip", "the usual name comes back");
         assert!(s.set("skin", "dragon").is_err());
         assert!(s.set("motivate", "off").is_ok());
         assert_eq!(s.motivate, 0);

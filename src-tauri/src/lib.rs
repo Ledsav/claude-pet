@@ -57,7 +57,7 @@ pub fn with_pet<R>(app: &AppHandle, f: impl FnOnce(&mut Pet) -> R) -> R {
     let state = app.state::<AppState>();
     let (speed, name) = {
         let s = state.settings.lock().unwrap();
-        (s.speed, s.name.clone())
+        (s.speed, s.display_name())
     };
     let (result, snapshot) = {
         let mut pet = state.pet.lock().unwrap();
@@ -113,7 +113,7 @@ async fn ask_pet(app: &AppHandle, state: &AppState, message: Option<String>) -> 
 
     let (name, model) = {
         let s = state.settings.lock().unwrap();
-        (s.name.clone(), s.model.clone())
+        (s.display_name(), s.effective_model())
     };
     let status = with_pet(app, |pet| pet.describe());
     let prompt = {

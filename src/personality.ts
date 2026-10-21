@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getSettings, onSettings } from "./api";
+import { onSettings } from "./api";
 
 const text = document.getElementById("text") as HTMLTextAreaElement;
 const resetBtn = document.getElementById("reset") as HTMLButtonElement;
@@ -104,14 +104,13 @@ window.addEventListener("focus", async () => {
 
 /** Says whose personality this is: skins like Spine come with their own. */
 async function describe() {
-  const s = await getSettings();
-  const info = await invoke<{ skin: string; own: boolean }>("personality_info");
+  const info = await invoke<{ skin: string; name: string; own: boolean }>("personality_info");
   const skinName = info.skin.charAt(0).toUpperCase() + info.skin.slice(1);
-  document.getElementById("title")!.textContent = info.own ? `${skinName}'s personality` : `${s.name}'s personality`;
+  document.getElementById("title")!.textContent = `${info.name}'s personality`;
   const which = document.getElementById("which")!;
   which.hidden = false;
   which.textContent = info.own
-    ? `The ${skinName} skin has its own personality. Switching to another skin brings back your usual one.`
+    ? `The ${skinName} skin is its own character, ${info.name}. Switching to another skin brings back your usual pet.`
     : `Shared by all skins except the ones with a personality of their own (Spine).`;
 }
 

@@ -72,11 +72,39 @@ impl History {
     }
 }
 
-/// Skins that come with a personality of their own. Every other skin shares the main one.
-const SKIN_PERSONALITIES: [(&str, &str); 1] = [("spine", include_str!("../personality/spine.md"))];
+/// A skin that comes with a character of its own: a fixed name and a personality.
+struct Persona {
+    skin: &'static str,
+    name: &'static str,
+    personality: &'static str,
+    /// Model this character talks with; comedy needs more than the default.
+    model: &'static str,
+}
+
+/// Every other skin shares the user's main pet (their name, the main personality).
+const PERSONAS: [Persona; 1] = [Persona {
+    skin: "spine",
+    name: "Spiny",
+    personality: include_str!("../personality/spine.md"),
+    model: "sonnet",
+}];
+
+fn persona(skin: &str) -> Option<&'static Persona> {
+    PERSONAS.iter().find(|p| p.skin == skin)
+}
 
 fn skin_personality(skin: &str) -> Option<&'static str> {
-    SKIN_PERSONALITIES.iter().find(|(s, _)| *s == skin).map(|(_, text)| *text)
+    persona(skin).map(|p| p.personality)
+}
+
+/// The model a skin's own character uses, if it has one.
+pub fn persona_model(skin: &str) -> Option<&'static str> {
+    persona(skin).map(|p| p.model)
+}
+
+/// The fixed name of a skin's own character, if it has one.
+pub fn persona_name(skin: &str) -> Option<&'static str> {
+    persona(skin).map(|p| p.name)
 }
 
 /// Whether picking this skin swaps in its own personality.
@@ -96,15 +124,25 @@ pub fn brain_dir(data_dir: &Path, skin: &str) -> std::io::Result<PathBuf> {
     let dir = if has_own_personality(skin) { data_dir.join(format!("brain-{skin}")) } else { data_dir.join("brain") };
     fs::create_dir_all(&dir)?;
     let file = dir.join("CLAUDE.md");
-    if !file.exists() {
-        fs::write(&file, default_personality(skin))?;
+    // A copy of what we wrote, so a personality nobody edited can follow app updates.
+    let seeded = dir.join(".seeded.md");
+    let default = default_personality(skin);
+    let untouched = match (fs::read_to_string(&file), fs::read_to_string(&seeded)) {
+        (Err(_), _) => true,
+        (Ok(current), Ok(original)) => current == original,
+        (Ok(_), Err(_)) => false, // from before we kept a copy: assume it was edited
+    };
+    if untouched && fs::read_to_string(&file).ok().as_deref() != Some(default) {
+        fs::write(&file, default)?;
+        fs::write(&seeded, default)?;
     }
     Ok(dir)
 }
 
-/// Overwrites the personality with the skin's built-in default.
+/// Overwrites the personality with the skin's built-in default (which then follows updates).
 pub fn reset_personality(brain: &Path, skin: &str) -> std::io::Result<()> {
-    fs::write(brain.join("CLAUDE.md"), default_personality(skin))
+    fs::write(brain.join("CLAUDE.md"), default_personality(skin))?;
+    fs::write(brain.join(".seeded.md"), default_personality(skin))
 }
 
 /// Prompt for an unprompted pep talk.
@@ -306,6 +344,29 @@ mod tests {
     }
 
     #[test]
+    fn untouched_personalities_follow_updates_but_edits_are_kept() {
+        let dir = std::env::temp_dir().join(format!("claude-pet-upgrade-{}", crate::stats::now_ms()));
+        let brain = brain_dir(&dir, "blob").unwrap();
+        let file = brain.join("CLAUDE.md");
+        // Simulate an older app version having seeded different text.
+        fs::write(&file, "old default").unwrap();
+        fs::write(brain.join(".seeded.md"), "old default").unwrap();
+        brain_dir(&dir, "blob").unwrap();
+        assert_eq!(fs::read_to_string(&file).unwrap(), DEFAULT_PERSONALITY, "unedited → upgraded");
+
+        fs::write(&file, "my own words").unwrap();
+        brain_dir(&dir, "blob").unwrap();
+        assert_eq!(fs::read_to_string(&file).unwrap(), "my own words", "edited → kept");
+
+        // Files from before the copy existed are treated as edited.
+        fs::remove_file(brain.join(".seeded.md")).unwrap();
+        fs::write(&file, "legacy").unwrap();
+        brain_dir(&dir, "blob").unwrap();
+        assert_eq!(fs::read_to_string(&file).unwrap(), "legacy");
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
     fn spine_has_its_own_personality_and_others_share_one() {
         let dir = std::env::temp_dir().join(format!("claude-pet-skins-{}", crate::stats::now_ms()));
         let main = brain_dir(&dir, "blob").unwrap();
@@ -313,7 +374,7 @@ mod tests {
         let spine = brain_dir(&dir, "spine").unwrap();
         assert_ne!(spine, main);
         let text = fs::read_to_string(spine.join("CLAUDE.md")).unwrap();
-        assert!(text.contains("spine") && text.contains("sarcastic"));
+        assert!(text.contains("You are Spiny"));
 
         // Editing one never touches the other, and reset restores the right default.
         fs::write(main.join("CLAUDE.md"), "my edits").unwrap();

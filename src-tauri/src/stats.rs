@@ -138,7 +138,7 @@ impl Pet {
     /// A one-line summary handed to Claude so replies match how the pet feels.
     pub fn describe(&self) -> String {
         format!(
-            "food {:.0}/100 (low = starving), mood {:.0}/100, energy {:.0}/100, {}",
+            "fullness {:.0}/100 (0 = starving, 100 = stuffed), mood {:.0}/100, energy {:.0}/100, {}",
             self.hunger,
             self.mood,
             self.energy,

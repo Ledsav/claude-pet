@@ -39,13 +39,15 @@ pub fn open_personality(app: AppHandle) {
 #[derive(serde::Serialize)]
 pub struct PersonalityInfo {
     skin: String,
+    name: String,
     own: bool,
 }
 
 #[tauri::command]
 pub fn personality_info(state: State<'_, AppState>) -> PersonalityInfo {
     let skin = state.skin();
-    PersonalityInfo { own: chat::has_own_personality(&skin), skin }
+    let name = state.settings.lock().unwrap().display_name();
+    PersonalityInfo { own: chat::has_own_personality(&skin), skin, name }
 }
 
 #[tauri::command]
