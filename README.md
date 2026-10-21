@@ -124,7 +124,7 @@ source in this repository. Nothing built on a personal machine is published.
 Releases are currently unsigned; free signing through the SignPath Foundation has been
 requested.
 
-- Committers and reviewers: [Alberto Valdes Rey](https://github.com/)
+- Committers and reviewers: [Alberto Valdes Rey](https://github.com/Ledsav)
 - Approver of each release: Alberto Valdes Rey
 
 **Privacy:** the app sends your chat messages, the pet's name and its current stats to
