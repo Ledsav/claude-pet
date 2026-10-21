@@ -1,11 +1,12 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions for the pet window",
-  "windows": ["main"],
+  "description": "Permissions for the pet window and the personality editor",
+  "windows": ["main", "personality"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
-    "core:window:allow-hide"
+    "core:window:allow-hide",
+    "core:window:allow-destroy"
   ]
 }

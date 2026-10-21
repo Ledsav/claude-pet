@@ -1,4 +1,5 @@
 mod chat;
+mod personality;
 mod settings;
 mod stats;
 mod tray;
@@ -170,8 +171,8 @@ async fn command(app: AppHandle, state: State<'_, AppState>, input: String) -> R
             Ok(updated.0)
         }
         Command::Personality { reset: false } => {
-            tray::open_personality(&app);
-            Ok("opening my personality file… save it and i'll change on the next chat".into())
+            personality::open_editor(&app);
+            Ok("opening my personality editor… save it and i'll change on the next chat".into())
         }
         Command::Personality { reset: true } => {
             chat::reset_personality(&state.brain).map_err(|e| format!("couldn't reset: {e}"))?;
@@ -230,7 +231,19 @@ fn place_bottom_right(window: &WebviewWindow) -> tauri::Result<()> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_pet, feed, play, sleep, chat, get_settings, command])
+        .invoke_handler(tauri::generate_handler![
+            get_pet,
+            feed,
+            play,
+            sleep,
+            chat,
+            get_settings,
+            command,
+            personality::get_personality,
+            personality::save_personality,
+            personality::reset_personality,
+            personality::open_personality_file,
+        ])
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             let settings = Settings::load(&data_dir);

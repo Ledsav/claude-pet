@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/personality.css" />
+    <title>Personality</title>
+  </head>
+  <body>
+    <main class="editor">
+      <header>
+        <h1 id="title">Personality</h1>
+        <p class="lede">
+          Claude reads this before every message, so it decides how your pet talks and
+          what it cares about. Changes apply on the next chat.
+        </p>
+      </header>
+
+      <details class="tips">
+        <summary>What can I put here?</summary>
+        <ul>
+          <li><b>Voice:</b> how it talks (length, tone, sounds, emoji).</li>
+          <li><b>How it feels:</b> how food, mood and energy should color replies.</li>
+          <li><b>Work buddy:</b> how it motivates you, what to remind you about.</li>
+          <li>Anything else: likes, running jokes, your name, your projects.</li>
+        </ul>
+      </details>
+
+      <textarea
+        id="text"
+        spellcheck="true"
+        aria-label="Personality text"
+        placeholder="Describe who your pet is…"
+      ></textarea>
+
+      <footer>
+        <div class="secondary">
+          <button type="button" id="reset" class="ghost">Reset to default</button>
+          <button type="button" id="open-file" class="ghost">Open in text editor</button>
+        </div>
+        <span id="status" class="status" role="status" aria-live="polite"></span>
+        <button type="button" id="save" class="primary" disabled>Save</button>
+      </footer>
+    </main>
+    <script type="module" src="/src/personality.ts"></script>
+  </body>
+</html>
