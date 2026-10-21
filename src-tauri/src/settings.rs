@@ -152,7 +152,7 @@ pub enum Command {
     Reset { confirmed: bool },
 }
 
-pub const HELP: &str = "/settings · /settings <key> <value> · /motivate · /stats · /doctor · /personality [reset] · /clear · /reset";
+pub const HELP: &str = "/settings · /settings <key> <value> · /motivate · /stats · /doctor · /personality [reset] · /clear · /reset · /bye";
 
 pub fn parse(input: &str) -> Result<Command, String> {
     let input = input.trim().trim_start_matches('/');

@@ -73,8 +73,8 @@ pep talks), 90 s timeout. When Claude is unavailable, pep talks fall back to bui
 
 ## Sprites
 
-Each skin is one PNG atlas: 8 columns × 10 rows of 128 px frames (rendered at 2× for
-HiDPI). Rows: idle, happy, sad, hungry, tired, sleep, eat, play, talk, wiggle.
+Each skin is one PNG atlas: 8 columns × 11 rows of 128 px frames (rendered at 2× for
+HiDPI). Rows: idle, happy, sad, hungry, tired, sleep, eat, play, talk, wiggle, bye.
 `src/sprites.json` lists each row's frame count and per-frame durations.
 
 Skins are drawn procedurally in `scripts/sprites/skins.mjs`; animations live in

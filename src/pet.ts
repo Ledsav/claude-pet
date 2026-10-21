@@ -19,6 +19,9 @@ const MOOD_ANIM: Record<Mood, Anim> = {
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+/** How long one pass of an animation takes, in ms. */
+const length = (anim: Anim) => sprites.anims[anim].durations.reduce((sum, d) => sum + d, 0);
+
 /** Plays the sprite sheet for the current skin: a looping mood row plus one-shot reactions. */
 export class PetView {
   private sprite: HTMLElement;
@@ -49,7 +52,7 @@ export class PetView {
   setMood(mood: Mood) {
     if (mood === this.mood) return;
     this.mood = mood;
-    if (this.oneShotUntil === undefined) this.start(MOOD_ANIM[mood]);
+    if (this.oneShotUntil === undefined && !this.final) this.start(MOOD_ANIM[mood]);
   }
 
   /**
@@ -57,10 +60,19 @@ export class PetView {
    * looping rows (like talk) repeat for `ms`.
    */
   play(anim: Anim, ms?: number) {
-    const a = sprites.anims[anim];
-    const once = a.durations.reduce((sum, d) => sum + d, 0);
-    this.oneShotUntil = performance.now() + (ms ?? (a.loop ? once * 2 : once));
+    if (this.final) return;
+    this.oneShotUntil = performance.now() + (ms ?? (sprites.anims[anim].loop ? length(anim) * 2 : length(anim)));
     this.start(anim);
+  }
+
+  private final = false;
+
+  /** Plays `anim` once and stays on its last frame for good; resolves when it has finished. */
+  playFinal(anim: Anim): Promise<void> {
+    this.final = true;
+    this.oneShotUntil = Infinity;
+    this.start(anim);
+    return new Promise((done) => setTimeout(done, length(anim)));
   }
 
   private start(anim: Anim) {

@@ -1,4 +1,4 @@
-use crate::{perform, personality, stats::Pet};
+use crate::{farewell, perform, personality, stats::Pet};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -58,7 +58,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             "play" => drop(perform(app, Pet::play)),
             "sleep" => drop(perform(app, Pet::toggle_sleep)),
             "personality" => personality::open_editor(app),
-            "quit" => app.exit(0),
+            "quit" => farewell(app),
             _ => {}
         })
         .on_tray_icon_event(|tray, event| {

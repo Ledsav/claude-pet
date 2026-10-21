@@ -142,22 +142,6 @@ button:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-.primary {
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 600;
-  min-width: 84px;
-}
-
-.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-}
-
-.primary:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
 .ghost {
   background: transparent;
   color: var(--muted);

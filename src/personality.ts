@@ -1,15 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getSettings } from "./api";
 
 const text = document.getElementById("text") as HTMLTextAreaElement;
-const saveBtn = document.getElementById("save") as HTMLButtonElement;
 const resetBtn = document.getElementById("reset") as HTMLButtonElement;
 const openBtn = document.getElementById("open-file") as HTMLButtonElement;
 const status = document.getElementById("status")!;
 
 let saved = "";
 let statusTimer: number | undefined;
+let saveTimer: number | undefined;
+const AUTOSAVE_MS = 700;
 
 const dirty = () => text.value !== saved;
 
@@ -20,11 +20,9 @@ function setStatus(msg: string, kind: "info" | "error" = "info", ms = 2500) {
   if (ms > 0) statusTimer = window.setTimeout(refresh, ms);
 }
 
-/** Shows "unsaved changes" or nothing, and enables Save only when there's something to save. */
 function refresh() {
-  saveBtn.disabled = !dirty();
   status.dataset.kind = "info";
-  status.textContent = dirty() ? "Unsaved changes" : "";
+  status.textContent = dirty() ? "Saving…" : "";
   document.title = dirty() ? "• Personality" : "Personality";
 }
 
@@ -34,7 +32,12 @@ async function load(value?: string) {
   refresh();
 }
 
+/**
+ * Saves now. Edits are also saved automatically shortly after typing stops, so closing
+ * the window never has to wait for anything (or block on it).
+ */
 async function save() {
+  clearTimeout(saveTimer);
   if (!dirty()) return true;
   try {
     await invoke("save_personality", { text: text.value });
@@ -78,18 +81,18 @@ openBtn.addEventListener("click", async () => {
   invoke("open_personality_file").catch((err) => setStatus(String(err), "error", 0));
 });
 
-saveBtn.addEventListener("click", () => void save());
-text.addEventListener("input", refresh);
+text.addEventListener("input", () => {
+  refresh();
+  clearTimeout(saveTimer);
+  saveTimer = window.setTimeout(() => void save(), AUTOSAVE_MS);
+});
+// Leaving the window flushes a pending save right away.
+window.addEventListener("blur", () => void save());
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
     e.preventDefault();
     void save();
   }
-});
-
-// Closing never loses work: unsaved edits are saved on the way out.
-void getCurrentWindow().onCloseRequested(async (event) => {
-  if (dirty() && !(await save())) event.preventDefault();
 });
 
 // Reload if the file was edited elsewhere while this window was in the background.

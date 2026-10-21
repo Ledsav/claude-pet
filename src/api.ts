@@ -32,6 +32,8 @@ export const getPet = () => invoke<Pet>("get_pet");
 export const act = (action: "feed" | "play" | "sleep") => invoke<Reaction>(action);
 export const getSettings = () => invoke<Settings>("get_settings");
 export const runCommand = (input: string) => invoke<string>("command", { input });
+export const quit = () => invoke("quit");
+export const openPersonality = () => invoke("open_personality");
 export const chat = (message: string) => invoke<string>("chat", { message });
 
 export const onStats = (cb: (pet: Pet) => void) => listen<Pet>("stats", (e) => cb(e.payload));

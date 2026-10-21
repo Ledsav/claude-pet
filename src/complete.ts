@@ -27,6 +27,7 @@ const COMMANDS: { cmd: string; hint: string; args?: Arg[]; keys?: Arg[] }[] = [
   { cmd: "clear", hint: "forget our conversation" },
   { cmd: "reset", hint: "hatch a new pet", args: [{ name: "confirm", hint: "yes, really" }] },
   { cmd: "help", hint: "list commands" },
+  { cmd: "bye", hint: "say goodbye and close the app" },
 ];
 
 const starts = (s: string, prefix: string) => s.toLowerCase().startsWith(prefix.toLowerCase());
@@ -41,8 +42,10 @@ export function suggest(input: string): Suggestion[] {
     return COMMANDS.filter((c) => starts(c.cmd, cmdPart)).map((c) => ({
       label: `/${c.cmd}`,
       hint: c.hint,
-      value: `/${c.cmd}${c.keys || c.args ? " " : ""}`,
-      final: !c.keys && !c.args,
+      // Only /settings needs a next part; other arguments are optional (and destructive:
+      // `reset`, `confirm`), so completing never sets them up to be picked by Enter.
+      value: `/${c.cmd}${c.keys ? " " : ""}`,
+      final: !c.keys,
     }));
   }
 

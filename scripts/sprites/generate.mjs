@@ -82,6 +82,17 @@ const ANIMS = {
   wiggle: { fps: 10, loop: false, frames: [-9, 8, -6, 4, -2, 0].map((rot, i) => ({
     rot, sx: 1, sy: 1, eyes: i < 4 ? "happy" : "open", mouth: "grin", a: 0.9, t: i / 6, fx: { heart: i / 5 },
   })) },
+  // Quitting: a little wave, eyes go x_x, it flops into a puddle and its soul floats away.
+  bye: { fps: 3, loop: false, durations: [380, 380, 520, 420, 360, 360, 360, 700], frames: [
+    { rot: -5, eyes: "happy", mouth: "grin", a: 0.6, t: 0 },
+    { rot: 5, eyes: "happy", mouth: "grin", a: 0.6, t: 0.2 },
+    { sx: 1.02, sy: 0.98, eyes: "closed", mouth: "flat", a: -0.3, t: 0.4 },
+    { sx: 1.1, sy: 0.86, eyes: "dead", mouth: "openSmall", a: -1, t: 0.5 },
+    { sx: 1.16, sy: 0.78, eyes: "dead", mouth: "openSmall", a: -1, t: 0.5, fx: { soul: 0.1 } },
+    { sx: 1.2, sy: 0.72, fade: 0.75, eyes: "dead", mouth: "flat", a: -1, t: 0.5, fx: { soul: 0.4 } },
+    { sx: 1.22, sy: 0.7, fade: 0.45, eyes: "dead", mouth: "flat", a: -1, t: 0.5, fx: { soul: 0.7 } },
+    { sx: 1.24, sy: 0.68, fade: 0.15, eyes: "dead", mouth: "flat", a: -1, t: 0.5, fx: { soul: 1 } },
+  ] },
 };
 
 function range(n, f) {
@@ -103,6 +114,8 @@ function eye(kind, x, y, side) {
       return `<path d="M${x - 4.6} ${y}a4.6 4 0 0 0 9.2 0z" fill="${INK}"/><path d="M${x - 5.5} ${y}h11" ${s}/>`;
     case "happy":
       return `<path d="M${x - 5} ${y + 2}q5 -7 10 0" ${s}/>`;
+    case "dead":
+      return `<path d="M${x - 4} ${y - 4}l8 8M${x + 4} ${y - 4}l-8 8" ${s}/>`;
     case "sad": {
       const brow = side < 0 ? `M${x - 5} ${y - 9}L${x + 4} ${y - 12}` : `M${x + 5} ${y - 9}L${x - 4} ${y - 12}`;
       return `<ellipse cx="${x}" cy="${y + 1}" rx="4.4" ry="5.4" fill="${INK}"/><circle cx="${x + 1.4}" cy="${y - 1}" r="1.5" fill="#fff"/><path d="${brow}" ${s}/>`;
@@ -164,19 +177,32 @@ function effects(fx = {}, skin) {
     const y = eyeY + 7 + fx.tear * 10;
     out += `<path d="M${64 - eyeDX - 3} ${y}q-2.6 4 0 6q2.6 -2 0 -6z" fill="#7FB6E8" opacity="${(1 - fx.tear * 0.5).toFixed(2)}"/>`;
   }
+  if (fx.soul !== undefined) {
+    // A little ghost with a peaceful face, drifting up and to the side with a slight sway.
+    const ph = fx.soul;
+    const x = 64 + Math.sin(ph * Math.PI * 1.5) * 8;
+    const y = 64 - ph * 40;
+    const op = ph < 0.15 ? 0.6 + ph * 2.5 : 0.95 - Math.max(0, ph - 0.6) * 1.8;
+    const s = 1 + ph * 0.3;
+    out += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)}) rotate(${(Math.sin(ph * 9) * 6).toFixed(1)})" opacity="${Math.max(0, op).toFixed(2)}">
+      <path d="M-12 4c0-10 5-17 12-17s12 7 12 17v11l-4-3-4 3-4-3-4 3-4-3-4 3z" fill="#FFFFFF" stroke="#C9DDF0" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M-6 0q2 2 4 0M2 0q2 2 4 0" stroke="${INK}" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <ellipse cx="-8" cy="4" rx="2.4" ry="1.4" fill="#F7A48E" opacity=".7"/><ellipse cx="8" cy="4" rx="2.4" ry="1.4" fill="#F7A48E" opacity=".7"/>
+    </g>`;
+  }
   return out;
 }
 
 // ---------- assembly ----------
 
 function frameSvg(p, skin) {
-  const { sx = 1, sy = 1, tx = 0, ty = 0, rot = 0 } = p;
+  const { sx = 1, sy = 1, tx = 0, ty = 0, rot = 0, fade = 1 } = p;
   const fit = skin.fit ?? 1; // shrinks tall skins so jumps stay inside the cell
   const lift = Math.min(1, -ty / 30);
   const shadow = `<ellipse cx="64" cy="${GROUND + 3}" rx="${(34 * (1 - lift * 0.45) * sx).toFixed(1)}" ry="${(4.5 * (1 - lift * 0.4)).toFixed(1)}" fill="#2B1B17" opacity="${(0.18 * (1 - lift * 0.5)).toFixed(2)}"/>`;
   const body = skin.draw(p) + face(p, skin);
   const t = `translate(${64 + tx} ${GROUND + ty}) rotate(${rot}) scale(${(sx * fit).toFixed(3)} ${(sy * fit).toFixed(3)}) translate(-64 -${GROUND})`;
-  return `${shadow}<g transform="${t}">${body}</g>${effects(p.fx, skin)}`;
+  return `<g opacity="${fade}">${shadow}<g transform="${t}">${body}</g></g>${effects(p.fx, skin)}`;
 }
 
 function sheetSvg(skin) {

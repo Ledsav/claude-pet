@@ -31,6 +31,11 @@ fn file(state: &AppState) -> std::path::PathBuf {
 }
 
 #[tauri::command]
+pub fn open_personality(app: AppHandle) {
+    open_editor(&app);
+}
+
+#[tauri::command]
 pub fn get_personality(state: State<'_, AppState>) -> Result<String, String> {
     fs::read_to_string(file(&state)).map_err(|e| format!("couldn't read personality: {e}"))
 }

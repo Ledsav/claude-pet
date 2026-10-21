@@ -7,10 +7,15 @@ import {
   onReaction,
   onSettings,
   onStats,
+  openPersonality,
+  quit,
   runCommand,
   type Pet,
   type Reaction,
 } from "./api";
+import { listen } from "@tauri-apps/api/event";
+import { Menu } from "@tauri-apps/api/menu";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Panel } from "./panel";
 import { PetView, type Mood } from "./pet";
 
@@ -62,6 +67,7 @@ const panel = new Panel(
 );
 
 async function talk(msg: string) {
+  if (/^\/(bye|quit|exit)\s*$/i.test(msg)) return farewell();
   if (msg.startsWith("/")) return command(msg);
   panel.setThinking(true);
   bubbleText.textContent = "";
@@ -89,7 +95,47 @@ async function command(input: string) {
   }
 }
 
+let leaving = false;
+
+/** Goodbye: the pet waves, flops, its little soul floats away, then the app closes. */
+async function farewell() {
+  if (leaving) return;
+  leaving = true;
+  document.body.classList.add("leaving");
+  say("bye bye! see you soon", 0);
+  await pet.playFinal("bye");
+  await quit();
+}
+
+let latest: Pet | undefined;
+
+/** Right-click on the pet: the everyday actions, plus a way out. */
+async function showPetMenu() {
+  if (leaving) return;
+  const menu = await Menu.new({
+    items: [
+      { id: "feed", text: "Feed", action: () => void act("feed") },
+      { id: "play", text: "Play", action: () => void act("play") },
+      { id: "sleep", text: latest?.asleep ? "Wake up" : "Sleep", action: () => void act("sleep") },
+      { item: "Separator" },
+      { id: "personality", text: "Edit personality…", action: () => void openPersonality() },
+      { id: "hide", text: "Hide (tray icon brings me back)", action: () => void getCurrentWindow().hide() },
+      { item: "Separator" },
+      { id: "bye", text: "Bye bye 👋", action: () => void farewell() },
+    ],
+  });
+  await menu.popup();
+}
+
+document.addEventListener("contextmenu", (e) => {
+  // Keep the browser's menu for the text fields; everything else gets ours.
+  if ((e.target as HTMLElement).closest("input, textarea")) return;
+  e.preventDefault();
+  if ((e.target as HTMLElement).closest("#pet")) void showPetMenu();
+});
+
 function render(p: Pet) {
+  latest = p;
   pet.setMood(moodOf(p));
   panel.update(p);
 }
@@ -107,6 +153,7 @@ void onStats(render);
 void onReaction(react);
 void onSettings((s) => pet.setSkin(s.skin));
 void onNudge(speak);
+void listen("farewell", () => void farewell()); // Quit from the tray
 void Promise.all([getPet(), getSettings()]).then(([p, s]) => {
   pet.setSkin(s.skin);
   render(p);

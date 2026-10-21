@@ -304,6 +304,15 @@ input:focus-visible {
   text-overflow: ellipsis;
 }
 
+/* while saying goodbye: no controls, no dragging */
+body.leaving .panel {
+  display: none;
+}
+
+body.leaving .pet {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

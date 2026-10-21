@@ -1,7 +1,7 @@
 {
   "frame": 128,
   "cols": 8,
-  "rows": 10,
+  "rows": 11,
   "skins": {
     "blob": "Blob",
     "sprout": "Sprout",
@@ -148,6 +148,21 @@
         100,
         100,
         100
+      ]
+    },
+    "bye": {
+      "row": 10,
+      "frames": 8,
+      "loop": false,
+      "durations": [
+        380,
+        380,
+        520,
+        420,
+        360,
+        360,
+        360,
+        700
       ]
     }
   }

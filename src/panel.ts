@@ -128,7 +128,7 @@ export class Panel {
     } else if (e.key === "Tab") {
       e.preventDefault();
       this.accept(this.selected);
-    } else if (e.key === "Enter" && current.value.trim() !== this.input.value.trim()) {
+    } else if (e.key === "Enter" && completesWord(this.input.value, current.value)) {
       e.preventDefault();
       this.accept(this.selected);
     } else if (e.key === "Escape") {
@@ -150,6 +150,18 @@ export class Panel {
   setThinking(thinking: boolean) {
     this.sendBtn.disabled = thinking;
   }
+}
+
+/**
+ * Enter should finish a half-typed word (`/settings sk` → `skin`) but never tack on an
+ * optional argument: `/personality` + Enter runs the command instead of becoming
+ * `/personality reset`.
+ */
+function completesWord(typed: string, suggestion: string) {
+  const t = typed.trim();
+  const s = suggestion.trim();
+  // A trailing space means "now pick the next part", e.g. `/settings ` + Enter → skin.
+  return s !== t && (!s.startsWith(`${t} `) || typed.endsWith(" "));
 }
 
 function escape(s: string) {

@@ -147,6 +147,30 @@ async fn pep_talk_loop(app: AppHandle) {
     }
 }
 
+/// Saves and exits. The pet window calls this once its goodbye animation has played.
+#[tauri::command]
+fn quit(app: AppHandle) {
+    with_pet(&app, |_| ());
+    app.exit(0);
+}
+
+/// Asks the pet to say goodbye before quitting, or quits right away if it's hidden.
+/// Exits anyway after a few seconds in case the window never answers.
+pub fn farewell(app: &AppHandle) {
+    let visible = app
+        .get_webview_window("main")
+        .is_some_and(|w| w.is_visible().unwrap_or(false));
+    if !visible || app.emit_to("main", "farewell", ()).is_err() {
+        quit(app.clone());
+        return;
+    }
+    let app = app.clone();
+    thread::spawn(move || {
+        thread::sleep(Duration::from_secs(6));
+        quit(app);
+    });
+}
+
 #[tauri::command]
 fn get_settings(state: State<'_, AppState>) -> Settings {
     state.settings.lock().unwrap().clone()
@@ -239,6 +263,8 @@ pub fn run() {
             chat,
             get_settings,
             command,
+            quit,
+            personality::open_personality,
             personality::get_personality,
             personality::save_personality,
             personality::reset_personality,
