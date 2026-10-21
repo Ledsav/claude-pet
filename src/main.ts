@@ -1,4 +1,14 @@
-import { act, chat, getPet, onReaction, onStats, type Pet, type Reaction } from "./api";
+import {
+  act,
+  chat,
+  getPet,
+  getSettings,
+  onReaction,
+  onStats,
+  runCommand,
+  type Pet,
+  type Reaction,
+} from "./api";
 import { Panel } from "./panel";
 import { PetView, type Mood } from "./pet";
 
@@ -31,6 +41,7 @@ const panel = new Panel(
 );
 
 async function talk(msg: string) {
+  if (msg.startsWith("/")) return command(msg);
   panel.setThinking(true);
   bubbleEl.textContent = "";
   bubbleEl.classList.add("show", "thinking");
@@ -44,6 +55,15 @@ async function talk(msg: string) {
     say(String(err));
   } finally {
     panel.setThinking(false);
+  }
+}
+
+/** Slash commands are handled by the app itself, never sent to Claude. */
+async function command(input: string) {
+  try {
+    say(await runCommand(input), 8000);
+  } catch (err) {
+    say(String(err), 6000);
   }
 }
 
@@ -63,7 +83,7 @@ function react(r: Reaction) {
 
 void onStats(render);
 void onReaction(react);
-void getPet().then((p) => {
+void Promise.all([getPet(), getSettings()]).then(([p, s]) => {
   render(p);
-  say(p.asleep ? "zzz…" : "hi! i'm mochi.");
+  say(p.asleep ? "zzz…" : `hi! i'm ${s.name.toLowerCase()}. type /help for commands`);
 });

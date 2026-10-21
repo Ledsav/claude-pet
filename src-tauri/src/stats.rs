@@ -64,9 +64,9 @@ impl Pet {
     }
 
     /// Applies decay for the time elapsed since the last update, including
-    /// time the app was closed. Wakes the pet once it is fully rested.
-    pub fn tick(&mut self, now: u64) {
-        let hours = now.saturating_sub(self.updated_at) as f64 / HOUR_MS;
+    /// time the app was closed, scaled by `speed`. Wakes the pet once it is fully rested.
+    pub fn tick(&mut self, now: u64, speed: f64) {
+        let hours = now.saturating_sub(self.updated_at) as f64 / HOUR_MS * speed;
         self.updated_at = now;
         if hours <= 0.0 {
             return;
@@ -159,12 +159,12 @@ impl Store {
 
     /// Loads the saved pet (catching up on decay while the app was closed),
     /// or hatches a new one if there is no readable save.
-    pub fn load(&self, now: u64) -> Pet {
+    pub fn load(&self, now: u64, speed: f64) -> Pet {
         let mut pet = fs::read_to_string(&self.path)
             .ok()
             .and_then(|s| serde_json::from_str::<Pet>(&s).ok())
             .unwrap_or_else(|| Pet::new(now));
-        pet.tick(now);
+        pet.tick(now, speed);
         pet
     }
 
@@ -188,7 +188,7 @@ mod tests {
     #[test]
     fn awake_pet_decays_over_time() {
         let mut pet = Pet::new(0);
-        pet.tick(2 * H);
+        pet.tick(2 * H, 1.0);
         assert_eq!(pet.hunger, 60.0);
         assert_eq!(pet.energy, 66.0);
         assert_eq!(pet.mood, 70.0);
@@ -197,10 +197,10 @@ mod tests {
     #[test]
     fn sleeping_restores_energy_and_wakes_when_full() {
         let mut pet = Pet { energy: 40.0, asleep: true, ..Pet::new(0) };
-        pet.tick(H);
+        pet.tick(H, 1.0);
         assert_eq!(pet.energy, 70.0);
         assert!(pet.asleep);
-        pet.tick(3 * H);
+        pet.tick(3 * H, 1.0);
         assert_eq!(pet.energy, 100.0);
         assert!(!pet.asleep);
     }
@@ -209,15 +209,15 @@ mod tests {
     fn neglect_drains_mood_faster() {
         let mut fed = Pet::new(0);
         let mut starving = Pet { hunger: 10.0, ..Pet::new(0) };
-        fed.tick(H);
-        starving.tick(H);
+        fed.tick(H, 1.0);
+        starving.tick(H, 1.0);
         assert!(starving.mood < fed.mood);
     }
 
     #[test]
     fn stats_never_leave_range() {
         let mut pet = Pet::new(0);
-        pet.tick(1000 * H);
+        pet.tick(1000 * H, 1.0);
         assert_eq!((pet.hunger, pet.mood, pet.energy), (0.0, 0.0, 0.0));
         pet.hunger = 90.0;
         pet.energy = 90.0;
@@ -226,10 +226,21 @@ mod tests {
     }
 
     #[test]
+    fn speed_scales_decay_and_zero_pauses() {
+        let mut fast = Pet::new(0);
+        fast.tick(H, 2.0);
+        assert_eq!(fast.hunger, 60.0);
+        let mut paused = Pet::new(0);
+        paused.tick(H, 0.0);
+        assert_eq!(paused.hunger, 80.0);
+        assert_eq!(paused.updated_at, H);
+    }
+
+    #[test]
     fn clock_going_backwards_is_harmless() {
         let mut pet = Pet::new(10 * H);
         let before = pet.clone();
-        pet.tick(5 * H);
+        pet.tick(5 * H, 1.0);
         assert_eq!(pet.hunger, before.hunger);
         assert_eq!(pet.updated_at, 5 * H);
     }
@@ -265,7 +276,7 @@ mod tests {
         let store = Store::new(&dir);
         let pet = Pet::new(0);
         store.save(&pet).unwrap();
-        let loaded = store.load(H);
+        let loaded = store.load(H, 1.0);
         assert_eq!(loaded.hunger, 70.0);
         assert_eq!(loaded.updated_at, H);
         fs::remove_dir_all(dir).unwrap();
@@ -276,9 +287,9 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("claude-pet-test-bad-{}", now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let store = Store::new(&dir);
-        assert_eq!(store.load(7), Pet::new(7));
+        assert_eq!(store.load(7, 1.0), Pet::new(7));
         fs::write(dir.join("pet.json"), "not json").unwrap();
-        assert_eq!(store.load(7), Pet::new(7));
+        assert_eq!(store.load(7, 1.0), Pet::new(7));
         fs::remove_dir_all(dir).unwrap();
     }
 }

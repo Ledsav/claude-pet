@@ -11,8 +11,6 @@ const DEFAULT_PERSONALITY: &str = include_str!("../personality/CLAUDE.md");
 const MAX_MESSAGE_CHARS: usize = 500;
 const HISTORY_TURNS: usize = 6;
 const CLI_TIMEOUT: Duration = Duration::from_secs(90);
-/// Fast and cheap is right for one-line pet replies. Override with CLAUDE_PET_MODEL.
-const DEFAULT_MODEL: &str = "haiku";
 
 /// Allows at most `max_calls` per sliding `window`, with at least `min_gap` between calls.
 pub struct RateLimiter {
@@ -25,6 +23,10 @@ pub struct RateLimiter {
 impl RateLimiter {
     pub fn new(min_gap: Duration, max_calls: usize, window: Duration) -> Self {
         Self { min_gap, window, max_calls, calls: VecDeque::new() }
+    }
+
+    pub fn set_max_calls(&mut self, max_calls: usize) {
+        self.max_calls = max_calls;
     }
 
     /// Records a call and returns Ok, or returns how long until the next call is allowed.
@@ -64,6 +66,10 @@ impl History {
             self.turns.pop_front();
         }
     }
+
+    pub fn clear(&mut self) {
+        self.turns.clear();
+    }
 }
 
 /// The folder `claude` runs in. Claude Code picks up its CLAUDE.md as the pet's personality.
@@ -85,8 +91,8 @@ pub fn clean_message(raw: &str) -> Result<String, String> {
     Ok(msg.chars().take(MAX_MESSAGE_CHARS).collect())
 }
 
-pub fn build_prompt(status: &str, history: &History, message: &str) -> String {
-    let mut prompt = format!("[your current state] {status}\n");
+pub fn build_prompt(name: &str, status: &str, history: &History, message: &str) -> String {
+    let mut prompt = format!("[your name] {name}\n[your current state] {status}\n");
     if !history.turns.is_empty() {
         prompt.push_str("[recent conversation]\n");
         for (human, pet) in &history.turns {
@@ -113,12 +119,11 @@ fn cli_path() -> PathBuf {
 
 /// Runs `claude -p <prompt>` in the brain folder with every tool disabled,
 /// so the pet can only talk.
-pub async fn ask_claude(brain: &Path, prompt: &str) -> Result<String, String> {
-    let model = std::env::var("CLAUDE_PET_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.into());
+pub async fn ask_claude(brain: &Path, model: &str, prompt: &str) -> Result<String, String> {
     let mut cmd = tokio::process::Command::new(cli_path());
     cmd.arg("-p")
         .arg(prompt)
-        .args(["--model", &model])
+        .args(["--model", model])
         .args(["--tools", ""])
         .arg("--strict-mcp-config")
         .arg("--no-session-persistence")
@@ -200,8 +205,8 @@ mod tests {
     fn prompt_includes_state_history_and_message() {
         let mut h = History::default();
         h.push("hi".into(), "hello!".into());
-        let p = build_prompt("food 50/100", &h, "how are you?");
-        assert!(p.starts_with("[your current state] food 50/100"));
+        let p = build_prompt("Pip", "food 50/100", &h, "how are you?");
+        assert!(p.starts_with("[your name] Pip\n[your current state] food 50/100"));
         assert!(p.contains("human: hi\nyou: hello!"));
         assert!(p.contains("[human says]\nhow are you?"));
     }
@@ -231,9 +236,9 @@ mod tests {
     fn real_claude_replies_in_character() {
         let dir = std::env::temp_dir().join(format!("claude-pet-live-{}", crate::stats::now_ms()));
         let brain = brain_dir(&dir).unwrap();
-        let prompt = build_prompt("food 20/100 (low = starving), mood 60/100, energy 70/100, awake", &History::default(), "hi! what's your name?");
+        let prompt = build_prompt("Mochi", "food 20/100 (low = starving), mood 60/100, energy 70/100, awake", &History::default(), "hi! what's your name?");
         let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
-        let reply = rt.block_on(ask_claude(&brain, &prompt)).unwrap();
+        let reply = rt.block_on(ask_claude(&brain, "haiku", &prompt)).unwrap();
         println!("mochi: {reply}");
         assert!(reply.to_lowercase().contains("mochi"));
         fs::remove_dir_all(dir).unwrap();

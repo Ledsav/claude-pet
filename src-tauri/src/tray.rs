@@ -18,10 +18,10 @@ pub fn toggle_window(app: &AppHandle) {
 }
 
 /// Keeps the tray tooltip showing current stats.
-pub fn show_stats(app: &AppHandle, pet: &Pet) {
+pub fn show_stats(app: &AppHandle, name: &str, pet: &Pet) {
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
         let tip = format!(
-            "Mochi{} · food {:.0} · mood {:.0} · energy {:.0}",
+            "{name}{} · food {:.0} · mood {:.0} · energy {:.0}",
             if pet.asleep { " (asleep)" } else { "" },
             pet.hunger,
             pet.mood,
@@ -31,7 +31,7 @@ pub fn show_stats(app: &AppHandle, pet: &Pet) {
     }
 }
 
-fn open_personality(app: &AppHandle) {
+pub fn open_personality(app: &AppHandle) {
     use tauri_plugin_opener::OpenerExt;
     let file = app.state::<AppState>().brain.join("CLAUDE.md");
     if let Err(e) = app.opener().open_path(file.to_string_lossy(), None::<&str>) {
