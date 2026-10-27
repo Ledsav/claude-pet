@@ -107,12 +107,22 @@ same layout.
 
 ## Develop
 
-Needs Node 20+, Rust (MSVC toolchain on Windows) and a logged-in `claude` CLI.
+Needs Node 20+, Rust stable (MSVC toolchain on Windows), the
+[Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+(*Desktop development with C++* workload), the WebView2 runtime (preinstalled on
+Windows 10/11) and a logged-in `claude` CLI. See Tauri's
+[prerequisites](https://v2.tauri.app/start/prerequisites/) for other platforms.
 
 ```bash
+git clone https://github.com/Ledsav/claude-pet.git
+cd claude-pet
 npm install
+npm run build        # the Rust crate embeds dist/, so build it before cargo test
 npm run tauri dev
 ```
+
+In VS Code, *Tasks: Run Task → Setup (fresh clone)* does the install and build;
+*Dev* starts the app.
 
 ```bash
 cd src-tauri && cargo test

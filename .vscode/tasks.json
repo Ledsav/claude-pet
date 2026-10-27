@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "setup:npm-install",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "setup:build-frontend",
+      "detail": "The Rust crate embeds dist/, so it has to exist before cargo test compiles.",
+      "type": "shell",
+      "command": "npm run build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup (fresh clone)",
+      "detail": "npm install + npm run build. Needs Node 20+, Rust (MSVC), VS C++ Build Tools, WebView2.",
+      "dependsOrder": "sequence",
+      "dependsOn": ["setup:npm-install", "setup:build-frontend"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev",
+      "detail": "npm run tauri dev",
+      "type": "shell",
+      "command": "npm run tauri dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Test (cargo)",
+      "type": "shell",
+      "command": "cargo test",
+      "options": { "cwd": "${workspaceFolder}/src-tauri" },
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
